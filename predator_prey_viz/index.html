@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.4.0/lodash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
+
+<style type="text/css">
+body {
+	margin: 0px;
+	padding: 0px;
+	height: 100%;
+}
+.flexcontainer {
+	height:100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: row;
+}
+
+.centerdiv {
+}
+
+</style>
+
+<!-- 
+///////////////
+CUSTOMIZE BELOW
+///////////////
+ -->
+
+<title>TITLE</title>
+
+</head>
+<body>
+<div class="flexcontainer">
+	<div class="centerdiv">
+    <div id="app"> {{ message }} </div>
+		Predator-Prey Viz
+	</div>
+</div>
+
+
+
+
+
+
+
+<script>
+var apiURL = "https://apiurlapiurl";
+app = new Vue({
+  el: '#app',
+  data: {
+    message: "Vue is working.",
+  },
+  created: function () {
+    this.fetchData();
+    this.timer = setInterval(this.fetchData, 30 * 1000)
+  },
+  beforeDestroy: function() {
+    clearInterval(this.timer);
+  },
+  methods: {
+    fetchData: function () {
+      var xhr = new XMLHttpRequest()
+      var self = this
+      xhr.open('GET', apiURL)
+      xhr.onload = function () {
+        self.records = JSON.parse(xhr.responseText).records
+        console.log("Fetched data.");
+      }
+      xhr.send()
+    }
+  }
+})
+
+</script>
+</body>
+</html>
+
+
+
+
