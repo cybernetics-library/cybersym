@@ -32,6 +32,8 @@ def checkout():
 @app.route('/monuments')
 def monuments():
     state = db['monuments'].last()
+    if state is None:
+        state = compute_monuments_state([])
     return jsonify(**state)
 
 
