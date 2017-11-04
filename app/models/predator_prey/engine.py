@@ -1,25 +1,27 @@
 import time
 import requests
-
-import model
 import networkx as nx
+
+########
+
+import Monument_to_Relations_Logic as Logic
+
+########
 
 MONUMENTS_API_URL = "http://localhost:5000/monuments"
 
 
 def setup():
     # TODO: load state from db if null
-    global monuments, prev_monuments
     monuments = {} # fakes a state change
 #    G=nx.read_weighted_edgelist(model.model_pp) # TODO: make this work
 
 def update():
-    global monuments, prev_monuments
-    prev_monuments = monuments
-    monuments = requests.get(MONUMENTS_API_URL).json()
-    print(monuments)
-#    if(prev_monuments != monuments):
-#        print(model.monuments_delta_to_pp(prev_monuments, monuments))
+    this_monuments = requests.get(MONUMENTS_API_URL).json()
+
+    this_relations = Logic.state_to_relations(this_monuments)
+
+    print(this_relations)
 
 
 def run():
