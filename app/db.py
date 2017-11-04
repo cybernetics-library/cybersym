@@ -7,8 +7,8 @@ class DB:
 
     """simple file-based database,
     optimized to append and return last n items."""
-    def __init__(self, table):
-        self.path = os.path.join(self.DIR, table)
+    def __init__(self, name):
+        self.path = os.path.join(self.DIR, name)
 
     def last(self):
         """returns last item"""
@@ -28,11 +28,12 @@ class DB:
             for line in f.readlines():
                 yield json.loads(line.strip())
 
-    def append(self, data):
+    def append(self, *data):
         """adds a new item"""
         with open(self.path, 'a') as f:
-            f.write(json.dumps(data))
-            f.write('\n')
+            for d in data:
+                f.write(json.dumps(d))
+                f.write('\n')
 
     # <https://stackoverflow.com/a/6813975>
     def tail(self, n=1):
