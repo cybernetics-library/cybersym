@@ -3,6 +3,7 @@ from .topics import get_topic_mixture
 from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -44,3 +45,12 @@ def pp():
         'animals->humans': 3
     }
     return jsonify(**dummy)
+
+# proc = subprocess.Popen(['python', '-u', 'app/pp_model/engine.py'], stdout=subprocess.PIPE)
+# while True:
+    # line = proc.stdout.readline()
+    # if len(line) > 0:
+        # print("test:", line.rstrip())
+    # else:
+        # break
+
