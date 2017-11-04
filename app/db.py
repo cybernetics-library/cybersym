@@ -9,6 +9,8 @@ class DB:
     optimized to append and return last n items."""
     def __init__(self, name):
         self.path = os.path.join(self.DIR, name)
+        if not os.path.exists(self.path):
+            open(self.path, 'w').close()
 
     def last(self):
         """returns last item"""
