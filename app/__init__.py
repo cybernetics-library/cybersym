@@ -1,23 +1,38 @@
+from .db import DB
+from .topics import get_topic_mixture
+from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
-
 app = Flask(__name__)
 CORS(app)
+db = {
+    table: DB(table)
+    for table in ['books', 'monuments']
+}
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
-    data = request.json()
-    # TODO
+    """accepts a list of book ids at the key `ids`,
+    then loads their topic mixtures
+    and computes a new monuments state"""
+    # save new book ids
+    book_ids = request.json['ids']
+    db['books'].append(*book_ids)
+
+    # load all book ids and their topic mixtures
+    topic_mixtures = [get_topic_mixture(id) for id in db['books'].all()]
+
+    # compute new monuments state and save to db
+    monuments_state = compute_monuments_state(topic_mixtures)
+    db['monuments'].append(monuments_state)
+    return jsonify(**monuments_state)
 
 
 @app.route('/monuments')
 def monuments():
-    dummy = {
-        'military': 24.81,
-        'biology': 64.18
-    }
-    return jsonify(**dummy)
+    state = db['monuments'].last()
+    return jsonify(**state)
 
 
 @app.route('/pp')
