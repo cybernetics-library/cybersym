@@ -17,9 +17,9 @@ def setup():
 #    G=nx.read_weighted_edgelist(model.model_pp) # TODO: make this work
 
 def update():
-    this_monuments = requests.get(MONUMENTS_API_URL).json()
+    this_mstate = requests.get(MONUMENTS_API_URL).json()
 
-    this_relations = Logic.state_to_relations(this_monuments)
+    this_relations = Logic.state_to_relations(this_mstate)
 
     print(this_relations)
 
