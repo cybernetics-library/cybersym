@@ -38,7 +38,7 @@ CUSTOMIZE BELOW
 <body>
 <div class="flexcontainer">
 	<div class="centerdiv">
-    <div id="app"> {{ message }} </div>
+    <div id="app"> {{ pp }} </div>
 		Predator-Prey Viz
 	</div>
 </div>
@@ -50,11 +50,12 @@ CUSTOMIZE BELOW
 
 
 <script>
-var apiURL = "https://apiurlapiurl";
+var apiURL = "http://localhost:5000/pp";
 app = new Vue({
   el: '#app',
   data: {
     message: "Vue is working.",
+    pp: null
   },
   created: function () {
     this.fetchData();
@@ -69,7 +70,8 @@ app = new Vue({
       var self = this
       xhr.open('GET', apiURL)
       xhr.onload = function () {
-        self.records = JSON.parse(xhr.responseText).records
+        self.pp = JSON.parse(xhr.responseText);
+        console.log(self.pp);
         console.log("Fetched data.");
       }
       xhr.send()
