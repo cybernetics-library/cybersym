@@ -1,5 +1,6 @@
 from collections import defaultdict
 import operator
+import networkx
 
 model_monument_to_pp_influence = {
         # example: "monument factor": { "pp_model_factor": "increase"}
