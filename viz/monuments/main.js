@@ -193,13 +193,19 @@ class Monuments {
           self.names[obj.uuid] = name;
         }
       });
+      self.updateState(monuments.state);
     };
     xhr.send();
   }
 
-  scaleObj(topic, mult) {
-    var obj = this.objs[topic],
-        scale = obj.scale.x * mult;
+  updateState(state) {
+    Object.keys(state).map(topic => {
+      this.scaleObj(topic, baseScale + state[topic]);
+    });
+  }
+
+  scaleObj(topic, scale) {
+    var obj = this.objs[topic];
     scale = Math.min(scale, maxScale);
     new TWEEN.Tween(obj.scale).to({
           x: scale,
