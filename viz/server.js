@@ -35,6 +35,9 @@ app.get('/predator_prey', function(req, res){
     res.sendFile(__dirname + '/predator_prey/index.html');
 });
 
+app.get('/monuments', function(req, res){
+    res.sendFile(__dirname + '/monuments/index.html');
+});
 
 
 ///////// express server a
