@@ -11,17 +11,23 @@
             background: #b2e1ff;
             font-family: 'Muli';
         }
-        .monument-tooltip {
+        .tooltip {
             background: #222;
             color: #fff;
             border-radius: 0.2em;
             text-align: center;
             padding: 0.1em 0.5em;
             line-height: 1.4;
+            position: fixed;
+        }
+        .title-tooltip {
+            left: 1em;
+            bottom: 1em;
         }
     </style>
 </head>
 <body>
+    <div class="tooltip title-tooltip">The Plane of Monuments</div>
     <script src="monuments_bundle.js"></script>
 </body>
 </html>
