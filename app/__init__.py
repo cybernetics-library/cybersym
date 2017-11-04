@@ -48,11 +48,10 @@ def pp():
     }
     return jsonify(**dummy)
 
-# proc = subprocess.Popen(['python', '-u', 'app/pp_model/engine.py'], stdout=subprocess.PIPE)
-# while True:
-    # line = proc.stdout.readline()
-    # if len(line) > 0:
-        # print("test:", line.rstrip())
-    # else:
-        # break
+try:
+    proc
+except:
+    proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
+
+
 
