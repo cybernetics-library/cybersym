@@ -65,15 +65,18 @@ function randMat() {
   return mat;
 }
 
-function randObj() {
+function randObj(theta) {
+  var radius = 8;
   var geo = randGeo(),
       mat = randMat(),
       obj = new THREE.Mesh(geo, mat),
       box = new THREE.Box3().setFromObject(obj),
       size = box.getSize();
   geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, size.y/2, 0 ) ); // set pivot to origin
-  obj.position.x = rand(posRange.x[0] * scale, posRange.x[1] * scale);
-  obj.position.z = rand(posRange.z[0] * scale, posRange.z[1] * scale);
+  // obj.position.x = rand(posRange.x[0] * scale, posRange.x[1] * scale);
+  // obj.position.z = rand(posRange.z[0] * scale, posRange.z[1] * scale);
+  obj.position.x = Math.cos(theta) * radius;
+  obj.position.z = Math.sin(theta) * radius;
   obj.rotation.y = rand(-20, 20);
   obj.scale.set(scale, scale, scale);
   return obj;
@@ -111,9 +114,6 @@ pointLight.position.set(0, 1, 0);
  var materialArray = [];
  for (var i = 0; i < 6; i++) {
    var map = THREE.ImageUtils.loadTexture( urls[i] );
-    // map.generateMipmaps = false;
-    // map.magFilter = THREE.NearestFilter;
-    // map.minFilter = THREE.NearestFilter;
   materialArray.push( new THREE.MeshBasicMaterial({
    map: map,
    side: THREE.BackSide,
@@ -132,9 +132,9 @@ var xhr = new XMLHttpRequest()
 xhr.open('GET', apiURL)
 xhr.onload = function() {
   var monuments = JSON.parse(xhr.responseText);
-  Object.keys(monuments.names).map(topic => {
+  Object.keys(monuments.names).map((topic, i) => {
     var name = monuments.names[topic];
-    var obj = randObj();
+    var obj = randObj(i * (2*Math.PI)/Object.keys(monuments.names).length);
     scene.add(obj);
     objs.push(obj);
     names[obj.uuid] = name;
@@ -160,14 +160,13 @@ var container = document.createElement('div');
 var tooltip = document.createElement('div');
 container.appendChild(tooltip);
 tooltip.style.position = 'fixed';
+tooltip.className = 'monument-tooltip';
 var aspect = window.innerWidth/window.innerHeight;
 document.body.appendChild(container);
 var camera = new THREE.PerspectiveCamera(50, aspect, 1, 5000);
 var D = 1;
-// var camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000);
-// camera.zoom = 0.08;
-// camera.position.z = 2000;
-// camera.position.y = 1000;
+var camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000);
+camera.zoom = 0.08;
 
 camera.position.z = 20;
 camera.position.y = 10;
@@ -207,8 +206,10 @@ renderer.domElement.addEventListener('mousemove', function(ev) {
     tooltip.innerHTML = names[obj.uuid];
     tooltip.style.left = `${ev.clientX + 20}px`;
     tooltip.style.top = `${ev.clientY}px`;
+    tooltip.style.display = 'block';
   } else {
     tooltip.innerHTML = '';
+    tooltip.style.display = 'none';
   }
 }, false);
 
