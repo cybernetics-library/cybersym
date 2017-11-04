@@ -3,6 +3,7 @@ from .topics import get_topic_mixture
 from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from .params import MONUMENT_NAMES
 
 app = Flask(__name__)
 CORS(app)
@@ -34,7 +35,7 @@ def monuments():
     state = db['monuments'].last()
     if state is None:
         state = compute_monuments_state([])
-    return jsonify(**state)
+    return jsonify(state=state, names=MONUMENT_NAMES)
 
 
 @app.route('/pp')

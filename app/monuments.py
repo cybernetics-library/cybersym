@@ -16,7 +16,7 @@ def compute_monuments_state(topic_mixtures):
     compute its deterministic monuments state"""
 
     # initial state
-    state = defaultdict(int)
+    state = {t: 0 for t in MONUMENT_GRAPH.keys()}
 
     # for each topic mixture
     # (each represents a book checkout)
