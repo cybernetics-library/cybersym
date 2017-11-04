@@ -1,4 +1,4 @@
-# cybersym
+# Cybersym
 
 ## Setup
 
