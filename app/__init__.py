@@ -25,16 +25,13 @@ def checkout():
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)
     db['monuments'].append(monuments_state)
-    return jsonify(monuments_state)
+    return jsonify(**monuments_state)
 
 
 @app.route('/monuments')
 def monuments():
-    dummy = {
-        'military': 24.81,
-        'biology': 64.18
-    }
-    return jsonify(**dummy)
+    state = db['monuments'].last()
+    return jsonify(**state)
 
 
 @app.route('/pp')
