@@ -1,8 +1,5 @@
-from .db import DB
 from .params import MONUMENT_GRAPH
 from collections import defaultdict
-
-db = DB('monuments')
 
 
 def sum_dicts(*dicts):
