@@ -23,8 +23,8 @@ class World:
         self.generations_run += 1
 
     def pprint(self):
-        print("GENERATION: {}".format(self.generations_run))
         self.WorldPloopy.pprint()
+        print("GENERATION: {}".format(self.generations_run))
 
     def replace_edges(self, relations):
         if(relations):

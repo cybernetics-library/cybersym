@@ -22,7 +22,14 @@ mstate_to_relations_functions = {
     "agriculture": lambda w: { "foxes->rabbits" : -0.3 * w, "rabbits->foxes": 0.8 * w}
 }
 
+OVERRIDE = True
 
+override_relations = {
+        "foxes->foxes": -0.5,
+        "foxes->rabbits": -0.3,
+        "rabbits->rabbits": 0.6,
+        "rabbits->foxes": 0.5
+        }
 ###################
 ###################
 
@@ -52,6 +59,10 @@ def relations_to_ploopy_relations(relations):
 
 
 def monument_state_to_relations(mstate):
+    if(OVERRIDE):
+        ploopy_relations = relations_to_ploopy_relations(override_relations)
+        return ploopy_relations
+
     try: 
         converted_relations = [mstate_to_relations_functions[mkey](mval) for mkey, mval in mstate.items()]
         merged_relations = reduce(lambda a, b: combine_dicts(a, b), converted_relations, default_relations)

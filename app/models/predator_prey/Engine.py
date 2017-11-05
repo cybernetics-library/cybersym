@@ -9,8 +9,8 @@ from World import World
 
 MONUMENTS_API_URL = "http://localhost:5000/monuments"
 PP_API_URL = "http://localhost:5000/pp"
-UPDATE_INTERVAL_SECS = 1
-PP_POST_INTERVAL_SECS = 3
+UPDATE_INTERVAL_SECS = 0.5
+PP_POST_INTERVAL_SECS = 5
 
 #######
 
@@ -59,6 +59,7 @@ def run():
     starttime=time.time()
     while True:
         update()
+        PreyWorld.pprint()
         counter += 1
         time.sleep(UPDATE_INTERVAL_SECS - ((time.time() - starttime) % UPDATE_INTERVAL_SECS))
         if(counter >= (PP_POST_INTERVAL_SECS / UPDATE_INTERVAL_SECS)):
@@ -66,7 +67,6 @@ def run():
             update_db_with_world_state()
 
 def update_db_with_world_state():
-    PreyWorld.pprint()
     G = PreyWorld.export_graph()
     print("updatingdb")
     print(G)
