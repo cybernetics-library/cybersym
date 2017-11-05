@@ -28,7 +28,7 @@ override_relations = {
         "foxes->foxes": -0.2,
         "foxes->rabbits": -0.0005,
         "rabbits->rabbits": 0.04,
-        "rabbits->foxes": 0.0004
+        "rabbits->foxes": 0.004
         }
 ###################
 ###################
