@@ -28,26 +28,7 @@ function randInt(min, max) {
   return Math.floor(rand(min, max));
 }
 
-function choice(opts) {
-  var idx = Math.floor(Math.random() * opts.length);
-  return opts[idx];
-}
-
-function randGeo() {
-  var type = choice(['box', 'torus', 'cylinder']);
-  var baseSize = 10;
-  var height = 20;
-  switch (type) {
-      case 'box':
-        return new THREE.BoxGeometry(baseSize, height, baseSize);
-      case 'torus':
-        return new THREE.TorusGeometry(height/4, baseSize/2, randInt(12,20), randInt(12,20), Math.PI);
-      case 'cylinder':
-        return new THREE.CylinderGeometry(rand(5,12), rand(5,12), height, randInt(12,36));
-  }
-}
-
-function makeMat(topic) {
+function genMat(topic) {
   var color = colors[topic];
   var mat = new THREE.MeshLambertMaterial({color: color, refractionRatio: 0.95});
   mat.emissiveIntensity = 0.6;
@@ -59,19 +40,23 @@ function makeMat(topic) {
   return mat;
 }
 
-function randObj(topic, theta) {
-  var geo = randGeo(),
-      mat = makeMat(topic),
-      obj = new THREE.Mesh(geo, mat),
-      box = new THREE.Box3().setFromObject(obj),
-      size = box.getSize();
-  geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, size.y/2, 0 ) ); // set pivot to origin
-  obj.position.x = Math.cos(theta) * (plateauRadius - plateauInset);
-  obj.position.z = Math.sin(theta) * (plateauRadius - plateauInset);
-  obj.rotation.y = rand(-20, 20);
-  obj.scale.set(baseScale, baseScale, baseScale);
+function genMonument(topic) {
+  var height = 20,
+      mat = genMat(topic),
+      geo = new THREE.CylinderGeometry(rand(5,12), rand(2,22), height, randInt(12,36));
+  geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, height/2, 0 ) ); // set pivot to origin
+  var obj = new THREE.Mesh(geo, mat);
+  for (var i=0; i<randInt(1, 5); i++) {
+    var nextHeight = rand(5,12);
+    var geo = new THREE.CylinderGeometry(rand(5,12), rand(5,12), nextHeight, randInt(12,36));
+    var mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(0, height, 0);
+    obj.add(mesh);
+    height += nextHeight;
+  }
   return obj;
 }
+
 
 class Monuments {
   constructor() {
@@ -187,12 +172,18 @@ class Monuments {
       Object.keys(monuments.names).map((topic, i) => {
         var name = monuments.names[topic];
         if (!(topic in self.objs)) {
-          var obj = randObj(topic, i * (2*Math.PI)/Object.keys(monuments.names).length);
+          var obj = genMonument(topic),
+              theta = i * (2*Math.PI)/Object.keys(monuments.names).length;
+          obj.position.x = Math.cos(theta) * (plateauRadius - plateauInset);
+          obj.position.z = Math.sin(theta) * (plateauRadius - plateauInset);
+          obj.rotation.y = rand(-20, 20);
+          obj.scale.set(baseScale, baseScale, baseScale);
           self.scene.add(obj);
           self.objs[topic] = obj;
           self.names[obj.uuid] = name;
         }
       });
+      console.log(monuments.state);
       self.updateState(monuments.state);
     };
     xhr.send();
