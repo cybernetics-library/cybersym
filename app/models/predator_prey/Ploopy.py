@@ -5,8 +5,8 @@ import ujson
 """
 Ploopy
 
-Simple directed weighted graph structure that's Loopy-esque
-Very light-weight. Each graph state is a dict.
+Simple directed edge_weighted graph structure that's Loopy-esque
+Very light-edge_weight. Each graph state is a dict.
 All functions just return new states, rather than editing the dict.
 
 Example State:
@@ -35,7 +35,7 @@ a = P.export_graph() # outputs P as a compressed format.
 P.import_graph(a) # imports a compressed format.
 """
 
-SIG_FIGS = 5
+SIG_FIGS = 8
 
 class Ploopy():
 
@@ -53,8 +53,8 @@ class Ploopy():
         self.Graph['edges'] = edges
         self._add_missing_nodes()
 
-    def add_edge(self, node_from_name, node_to_name, weight=1):
-        self.Graph['edges'][node_from_name][node_to_name] = weight
+    def add_edge(self, node_from_name, node_to_name, edge_weight=1):
+        self.Graph['edges'][node_from_name][node_to_name] = edge_weight
         self._create_node_if_none(name=node_from_name)
         self._create_node_if_none(name=node_to_name)
 
@@ -79,12 +79,15 @@ class Ploopy():
         # newG becomes the current graph. 
 
         for node_from, nodes_to in self.Graph['edges'].items():
-            for node_to, weight in nodes_to.items():
-                newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * weight 
+            for node_to, edge_weight in nodes_to.items():
+                if(node_from == node_to):
+                    newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * edge_weight 
+                else:
+                    newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * self.Graph['nodes'][node_to]['value'] * edge_weight 
 
         # round nodes to SIG_FIGS
         for name, node in newG['nodes'].items():
-            newG['nodes'][name]['value'] = round(node['value'], SIG_FIGS)
+            newG['nodes'][name]['value'] = max(0, round(node['value'], SIG_FIGS))
 
         self.Graph = newG
 
@@ -96,8 +99,8 @@ class Ploopy():
             print("{:10}({:3}), properties: {}".format(name, node['value'], node['properties']))
         print("=== Edges:")
         for node_from,nodes_to in sorted(self.Graph['edges'].items()):
-            for node_to, weight in nodes_to.items():
-                print("{:10} --> {:10} : {:4}".format(node_from, node_to, weight))
+            for node_to, edge_weight in nodes_to.items():
+                print("{:10} --> {:10} : {:4}".format(node_from, node_to, edge_weight))
 
 
 
@@ -107,8 +110,8 @@ class Ploopy():
             G[name] = node['value']
 
         for node_from, nodes_to in self.Graph['edges'].items():
-            for node_to, weight in nodes_to.items():
-                G[node_from + "->" + node_to] = weight
+            for node_to, edge_weight in nodes_to.items():
+                G[node_from + "->" + node_to] = edge_weight
 
         return G 
 

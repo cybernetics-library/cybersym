@@ -9,7 +9,7 @@ from World import World
 
 MONUMENTS_API_URL = "http://localhost:5000/monuments"
 PP_API_URL = "http://localhost:5000/pp"
-UPDATE_INTERVAL_SECS = 0.5
+UPDATE_INTERVAL_SECS = 0.1
 PP_POST_INTERVAL_SECS = 5
 
 #######
@@ -25,6 +25,7 @@ def setup():
         print("LOADING predator_prey state from API")
         print(ppstate)
         PreyWorld.import_graph(ppstate)
+        PreyWorld.pprint()
     except Exception as e:
         print(e)
 
@@ -48,7 +49,6 @@ def update():
         # although, in theory, nothing goes wrong if we do.
         prev_mstate = this_mstate
 
-    # update world with relations
     PreyWorld.update()
 
 

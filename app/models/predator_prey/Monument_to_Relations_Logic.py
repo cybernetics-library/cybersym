@@ -25,10 +25,10 @@ mstate_to_relations_functions = {
 OVERRIDE = True
 
 override_relations = {
-        "foxes->foxes": -0.5,
-        "foxes->rabbits": -0.3,
-        "rabbits->rabbits": 0.6,
-        "rabbits->foxes": 0.5
+        "foxes->foxes": -0.2,
+        "foxes->rabbits": -0.0005,
+        "rabbits->rabbits": 0.04,
+        "rabbits->foxes": 0.0004
         }
 ###################
 ###################
