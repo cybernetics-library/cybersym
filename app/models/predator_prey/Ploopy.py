@@ -1,7 +1,11 @@
 from collections import defaultdict
-import copy
+import ujson
 
 
+def deepcopy(d):
+    return ujson.loads(ujson.dumps(d))
+    # we're doing this because copy.deepcopy is very slow!
+    # https://stackoverflow.com/questions/24756712/deepcopy-is-extremely-slow
 
 
 """
@@ -70,7 +74,8 @@ class Ploopy():
     def update(self):
         self.pprint()
 
-        newG = copy.deepcopy(self.Graph)
+
+        newG = deepcopy(self.Graph)
 
         # iterate over each node, then that node's edges.
         # multiply the value of that node with the edge, and add it to the target node's value (in the newG)

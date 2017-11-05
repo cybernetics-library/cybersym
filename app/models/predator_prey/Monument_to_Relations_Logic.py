@@ -30,7 +30,9 @@ mstate_to_relations_functions = {
 
 def combine_dicts(a, b,  op=operator.add):
     c = defaultdict(float)
-    for k, v in a.items() + b.items():
+    for k, v in a.items():
+        c[k] += v
+    for k, v in b.items():
         c[k] += v
     return c
 
@@ -54,9 +56,7 @@ def relations_to_ploopy_relations(relations):
 def monument_state_to_relations(mstate):
     try: 
         converted_relations = [mstate_to_relations_functions[mkey](mval) for mkey, mval in mstate.items()]
-        print(converted_relations)
         merged_relations = reduce(lambda a, b: combine_dicts(a, b), converted_relations, default_relations)
-        print(merged_relations, "xxxxxxxxX")
         ploopy_relations = relations_to_ploopy_relations(merged_relations)
         return ploopy_relations
     except Exception as e:

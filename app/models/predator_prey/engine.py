@@ -34,7 +34,7 @@ def update():
     # update world with relations
     PreyWorld.update()
 
-INTERVAL_TIME = 1
+INTERVAL_TIME = 0.1
 
 def run():
     setup()
