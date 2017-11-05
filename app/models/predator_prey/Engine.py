@@ -19,9 +19,11 @@ def setup():
 
     PreyWorld = World()
 
-    # get graph from `/pp
+    # get graph from `/pp`
     try: 
         ppstate = requests.get(PP_API_URL).json()
+        print("LOADING predator_prey state from API")
+        print(ppstate)
         PreyWorld.import_graph(ppstate)
     except Exception as e:
         print(e)
@@ -68,33 +70,6 @@ def update_db_with_world_state():
     G = PreyWorld.export_graph()
     r = requests.post(PP_API_URL, data = G)
 
-
-#######
-
-def setup():
-    global PreyWorld, this_mstate, prev_mstate
-
-    PreyWorld = World()
-
-    # get graph from `/pp
-    try: 
-        ppstate = requests.get(PP_API_URL).json()
-        PreyWorld.import_graph(ppstate)
-    except Exception as e:
-        print(e)
-
-    prev_mstate = {}
-
-def update():
-    global PreyWorld, this_mstate, prev_mstate
-
-    # get from api
-    this_mstate = requests.get(MONUMENTS_API_URL).json()
-
-    if(this_mstate != prev_mstate): # if state is different
-
-        # convert monument state to relation graphs
-        new_relations = Logic.monument_state_to_relations(this_mstate)
 
 
 #######

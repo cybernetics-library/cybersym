@@ -9,7 +9,7 @@ app = Flask(__name__)
 CORS(app)
 db = {
     table: DB(table)
-    for table in ['books', 'monuments']
+    for table in ['books', 'monuments', 'pp']
 }
 
 @app.route('/checkout', methods=['POST'])
@@ -38,15 +38,25 @@ def monuments():
     return jsonify(**state)
 
 
-@app.route('/pp')
+@app.route('/pp', methods=['GET', 'POST'])
 def pp():
-    dummy = {
-        'humans': 100,
-        'animals': 20,
-        'humans->animals': 2,
-        'animals->humans': 3
-    }
-    return jsonify(**dummy)
+    if request.method == 'POST':
+        pp_state = request.form
+        db['pp'].append(pp_state)
+        return jsonify(**pp_state)
+
+    else:
+        state = db['pp'].last()
+        return jsonify(**state)
+
+
+        dummy = {
+            'humans': 100,
+            'animals': 20,
+            'humans->animals': 2,
+            'animals->humans': 3
+        }
+        return jsonify(**dummy)
 
 try:
     proc

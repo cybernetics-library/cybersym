@@ -80,7 +80,7 @@ class Ploopy():
 
         for node_from, nodes_to in self.Graph['edges'].items():
             for node_to, weight in nodes_to.items():
-                newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * weight
+                newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * weight 
 
         # round nodes to SIG_FIGS
         for name, node in newG['nodes'].items():
@@ -91,10 +91,10 @@ class Ploopy():
 
     def pprint(self):
         print("==================")
-        print("Nodes:")
+        print("=== Nodes:")
         for name, node in sorted(self.Graph['nodes'].items()):
             print("{:10}({:3}), properties: {}".format(name, node['value'], node['properties']))
-        print("Edges:")
+        print("=== Edges:")
         for node_from,nodes_to in sorted(self.Graph['edges'].items()):
             for node_to, weight in nodes_to.items():
                 print("{:10} --> {:10} : {:4}".format(node_from, node_to, weight))
@@ -118,10 +118,10 @@ class Ploopy():
         for k, v in  g.items():
             print(k, v)
             if("->" not in k):
-                Graph['nodes'][k] = { 'value': v, 'properties': {} }
+                Graph['nodes'][k] = { 'value': float(v), 'properties': {} }
             else:
                 (n_from, n_to) = k.split("->")
-                Graph['edges'][n_from][n_to] = v
+                Graph['edges'][n_from][n_to] = float(v)
         self.Graph = Graph
 
  

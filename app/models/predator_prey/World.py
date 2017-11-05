@@ -30,11 +30,12 @@ class World:
             self.WorldPloopy.replace_edges(relations)
 
     def import_graph(self, g):
-        self.WorldPloopy.import_graph(g)
         if('generations_run' in g):
-            self.generations_run = g['generations_run']
+            self.generations_run = int(g['generations_run'])
+            g.pop('generations_run')
         else:
             self.generations_run = 0
+        self.WorldPloopy.import_graph(g)
 
     def export_graph(self):
         g = self.WorldPloopy.export_graph()
