@@ -10,7 +10,7 @@ from World import World
 MONUMENTS_API_URL = "http://localhost:5000/monuments"
 PP_API_URL = "http://localhost:5000/pp"
 UPDATE_INTERVAL_SECS = 1
-PP_POST_INTERVAL_SECS = 5
+PP_POST_INTERVAL_SECS = 3
 
 #######
 
@@ -34,7 +34,7 @@ def update():
     global PreyWorld, this_mstate, prev_mstate
 
     # get from api
-    this_mstate = requests.get(MONUMENTS_API_URL).json()
+    this_mstate = requests.get(MONUMENTS_API_URL).json()['state']
 
     if(this_mstate != prev_mstate): # if state is different
 
@@ -68,7 +68,9 @@ def run():
 def update_db_with_world_state():
     PreyWorld.pprint()
     G = PreyWorld.export_graph()
-    r = requests.post(PP_API_URL, data = G)
+    print("updatingdb")
+    print(G)
+    r = requests.post(PP_API_URL, data=G)
 
 
 
