@@ -4,6 +4,7 @@ from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from .params import MONUMENT_NAMES
+import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -47,3 +48,11 @@ def pp():
         'animals->humans': 3
     }
     return jsonify(**dummy)
+
+try:
+    proc
+except:
+    proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
+
+
+
