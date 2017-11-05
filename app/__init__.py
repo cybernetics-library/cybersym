@@ -50,15 +50,6 @@ def pp():
         state = db['pp'].last()
         return jsonify(**state)
 
-
-        dummy = {
-            'humans': 100,
-            'animals': 20,
-            'humans->animals': 2,
-            'animals->humans': 3
-        }
-        return jsonify(**dummy)
-
 try:
     proc
 except:
