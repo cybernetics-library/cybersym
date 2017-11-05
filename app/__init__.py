@@ -31,6 +31,12 @@ def checkout():
     return jsonify(**monuments_state)
 
 
+@app.route('/books')
+def books():
+    """returns checked-out book ids"""
+    return db['books'].all()
+
+
 @app.route('/monuments')
 def monuments():
     state = db['monuments'].last()
