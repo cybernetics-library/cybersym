@@ -1,6 +1,7 @@
 from collections import defaultdict, Counter
 import operator
 import networkx
+from functools import reduce
 
 
 # LOGIC BELOW ###################
@@ -19,17 +20,19 @@ default_relations = {
 
 mstate_to_relations_functions = {
     "peace": lambda w: { "foxes->rabbits" : -0.3 * w },
-    "anger": lambda w: { "foxes->rabbits": 0.5 * w },
-    "agriculture": lambda w: { "rabbits->foxes" : 0.1 * w }
+    "anger": lambda w: { "foxes->rabbits": -0.2 * w },
+    "agriculture": lambda w: { "foxes->rabbits" : -0.3 * w, "rabbits->foxes": 0.8 * w}
 }
 
 
 ###################
 ###################
 
-def combine_dicts(a, b, op=operator.add):
-    return dict(a.items() + b.items() +
-        [(k, op(a[k], b[k])) for k in set(b) & set(a)])
+def combine_dicts(a, b,  op=operator.add):
+    c = defaultdict(float)
+    for k, v in a.items() + b.items():
+        c[k] += v
+    return c
 
 """ example mstate:
 {
@@ -39,10 +42,24 @@ def combine_dicts(a, b, op=operator.add):
 }
 """
 
-def state_to_relations(mstate):
+
+def relations_to_ploopy_relations(relations):
+    edges = [(key.split("->")[0], key.split("->")[1], round(val, 5)) for key,val in relations.items()]
+    r = defaultdict(lambda : defaultdict(float))
+    for edge in edges:
+        r[edge[0]][edge[1]] = edge[2]
+    return r
+
+
+def monument_state_to_relations(mstate):
     try: 
         converted_relations = [mstate_to_relations_functions[mkey](mval) for mkey, mval in mstate.items()]
+        print(converted_relations)
         merged_relations = reduce(lambda a, b: combine_dicts(a, b), converted_relations, default_relations)
-        return merged_relations
-    except:
+        print(merged_relations, "xxxxxxxxX")
+        ploopy_relations = relations_to_ploopy_relations(merged_relations)
+        return ploopy_relations
+    except Exception as e:
+        print(e)
         return None
+
