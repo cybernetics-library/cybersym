@@ -1,55 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.4.0/lodash.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
-
-<style type="text/css">
-body {
-	margin: 0px;
-	padding: 0px;
-	height: 100%;
-}
-.flexcontainer {
-	height:100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: row;
-}
-
-.centerdiv {
-}
-
-</style>
-
-<!-- 
-///////////////
-CUSTOMIZE BELOW
-///////////////
- -->
-
-<title>TITLE</title>
-
+    <meta charset="utf-8"/>
+    <title>☼MONUMENTS☼</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Muli');
+        html, body {
+            padding: 0;
+            margin: 0;
+            background: #b2e1ff;
+            font-family: 'Muli';
+        }
+        .tooltip {
+            background: #222;
+            color: #fff;
+            border-radius: 0.2em;
+            text-align: center;
+            padding: 0.1em 0.5em;
+            line-height: 1.4;
+            position: fixed;
+        }
+        .title-tooltip {
+            left: 1em;
+            bottom: 1em;
+        }
+    </style>
 </head>
 <body>
-<div class="flexcontainer">
-	<div class="centerdiv">
-    <div id="app"> {{ monuments }} </div>
-		Monument Viz
-	</div>
-</div>
-
-
-
-<script src="monuments_bundle.js"></script>
-
+    <div class="tooltip title-tooltip">The Plane of Monuments</div>
+    <script src="monuments_bundle.js"></script>
 </body>
 </html>
-
-
-
-

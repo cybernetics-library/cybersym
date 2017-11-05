@@ -21,6 +21,8 @@ var fs = require('fs');
     log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000
   }));
 
+  app.use(express.static('assets'));
+
 })();
 
 ////////////////////////////////
