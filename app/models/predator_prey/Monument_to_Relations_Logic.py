@@ -1,6 +1,4 @@
-from collections import defaultdict, Counter
-import operator
-import networkx
+from collections import defaultdict
 from functools import reduce
 
 
@@ -28,7 +26,7 @@ mstate_to_relations_functions = {
 ###################
 ###################
 
-def combine_dicts(a, b,  op=operator.add):
+def combine_dicts(a, b):
     c = defaultdict(float)
     for k, v in a.items():
         c[k] += v

@@ -2,20 +2,14 @@ from collections import defaultdict
 import ujson
 
 
-def deepcopy(d):
-    return ujson.loads(ujson.dumps(d))
-    # we're doing this because copy.deepcopy is very slow!
-    # https://stackoverflow.com/questions/24756712/deepcopy-is-extremely-slow
-
-
 """
 Ploopy
 
-simple directed graph structure that's loopy-esque
-super light weight. Each graph state is a dict.
-All functions just return new states.
+Simple directed weighted graph structure that's Loopy-esque
+Very light-weight. Each graph state is a dict.
+All functions just return new states, rather than editing the dict.
 
-Example structure is:
+Example State:
 {
     edges: {
         "rabbit": {"rabbit" : 0.5, "fox": 0.3 },
@@ -23,58 +17,61 @@ Example structure is:
     },
     nodes: {
         "rabbit": { "value": 0.5, "properties": {} },
-        "fox": { "value": 0.5, "properties": {} }
+        "fox": { "value": 0.3, "properties": {} }
     }
 }
 
-update() method updates nodes.
+Update() method 'runs' a single generation.
+
+Example usage:
+
+P = Ploopy()
+P.add_edge("rabbits", "foxes", 0.5)
+P.add_edge("foxes", "rabbits", -0.7)
+P.pprint() # outputs starting status
+P.update() # runs one generation
+P.pprint() # outputs new status
+a = P.export_graph() # outputs P as a compressed format.
+P.import_graph(a) # imports a compressed format.
 """
 
+SIG_FIGS = 5
 
 class Ploopy():
 
     def __init__(self):
-        self.Graph = {}
-        self.Graph['nodes'] = defaultdict(float)
-        self.Graph['edges'] = defaultdict(lambda: defaultdict(float))
+        self.Graph = self._make_empty_graph()
 
-
-    def add_edge(self, node_from_name, node_to_name, weight=1):
-        self.Graph['edges'][node_from_name][node_to_name] = weight
-        self.create_actor_if_none(name=node_from_name)
-        self.create_actor_if_none(name=node_to_name)
-
-    def create_actor_if_none(self, name, value=0, properties={}):
-        if(name not in self.Graph['nodes']):
-            self.Graph['nodes'][name] = { "value": value, "properties": properties}
-
-
-    def pprint(self):
-        for name, actor in self.Graph['nodes'].items():
-            print("{:10}({:3}), properties: {}".format(name, actor['value'], actor['properties']))
-        for node_from,nodes_to in self.Graph['edges'].items():
-            for node_to, weight in nodes_to.items():
-                print("{:10} --> {:10} : {:4}".format(node_from, node_to, weight))
-
+    @staticmethod
+    def _make_empty_graph():
+        g = {}
+        g['nodes'] = defaultdict(float)
+        g['edges'] = defaultdict(lambda: defaultdict(float))
+        return g
 
     def replace_edges(self, edges):
         self.Graph['edges'] = edges
-        self.add_missing_nodes()
+        self._add_missing_nodes()
 
-    def add_missing_nodes(self):
+    def add_edge(self, node_from_name, node_to_name, weight=1):
+        self.Graph['edges'][node_from_name][node_to_name] = weight
+        self._create_node_if_none(name=node_from_name)
+        self._create_node_if_none(name=node_to_name)
+
+    def _create_node_if_none(self, name, value=0, properties={}):
+        if(name not in self.Graph['nodes']):
+            self.Graph['nodes'][name] = { "value": value, "properties": properties}
+
+    def _add_missing_nodes(self):
         all_node_names = set()
         for node_from,nodes_to in self.Graph['edges'].items():
             all_node_names.add(node_from)
             all_node_names.update([k for k, v in nodes_to.items()])
 
         for n in all_node_names:
-            self.create_actor_if_none(n, value=1)
+            self._create_node_if_none(n, value=1)
         
-
     def update(self):
-        self.pprint()
-
-
         newG = deepcopy(self.Graph)
 
         # iterate over each node, then that node's edges.
@@ -85,7 +82,53 @@ class Ploopy():
             for node_to, weight in nodes_to.items():
                 newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * weight
 
+        # round nodes to SIG_FIGS
+        for name, node in newG['nodes'].items():
+            newG['nodes'][name]['value'] = round(node['value'], SIG_FIGS)
+
         self.Graph = newG
 
+
+    def pprint(self):
+        print("==================")
+        print("Nodes:")
+        for name, node in sorted(self.Graph['nodes'].items()):
+            print("{:10}({:3}), properties: {}".format(name, node['value'], node['properties']))
+        print("Edges:")
+        for node_from,nodes_to in sorted(self.Graph['edges'].items()):
+            for node_to, weight in nodes_to.items():
+                print("{:10} --> {:10} : {:4}".format(node_from, node_to, weight))
+
+
+
+    def export_graph(self):
+        G = {}
+        for name, node in self.Graph['nodes'].items():
+            G[name] = node['value']
+
+        for node_from, nodes_to in self.Graph['edges'].items():
+            for node_to, weight in nodes_to.items():
+                G[node_from + "->" + node_to] = weight
+
+        return G 
+
+    def import_graph(self, g):
+        Graph = self._make_empty_graph()
+
+        for k, v in  g.items():
+            print(k, v)
+            if("->" not in k):
+                Graph['nodes'][k] = { 'value': v, 'properties': {} }
+            else:
+                (n_from, n_to) = k.split("->")
+                Graph['edges'][n_from][n_to] = v
+        self.Graph = Graph
+
+ 
+
+def deepcopy(d):
+    return ujson.loads(ujson.dumps(d))
+    # we're doing this because copy.deepcopy is very slow!
+    # https://stackoverflow.com/questions/24756712/deepcopy-is-extremely-slow
 
 

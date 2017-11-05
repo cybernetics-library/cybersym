@@ -1,5 +1,3 @@
-import networkx as nx
-from collections import defaultdict
 from Ploopy import Ploopy
 import time
 
@@ -8,24 +6,26 @@ import time
 # as well as changing any Ploopy graph relations based on new input
 # as well as output, etc.
 
-# When the world changes Ploopy graph relations, it replaces them wholesale
-# not a modification, but a replacement.
-# this is so to ensure that there's no state/side effects
+# World treates Ploopy as a library that knows nothing about cybersym.
 
 class World:
 
     # example relations: {'rabbits->foxes': 0.08000000000000002, 'foxes->rabbits': 0.24}
-    def __init__(self, relations=None, actors=None):
+    def __init__(self, state=None):
         self.WorldPloopy = Ploopy()
-        self.change(relations=relations)
+        if(state):
+            parseState
+            print(state)
 
     # update loop
     def update(self):
-        start_time = time.time()
         self.WorldPloopy.update()
-        print("--- %s seconds ---" % (time.time() - start_time))
+        self.WorldPloopy.pprint()
 
     def change(self, relations=None):
         if(relations):
             self.WorldPloopy.replace_edges(relations)
+
+    def import_graph(self, g):
+        self.WorldPloopy.import_graph(g)
 
