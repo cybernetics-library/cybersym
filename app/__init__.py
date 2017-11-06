@@ -1,5 +1,5 @@
+import json
 from .db import DB
-from .topics import get_topic_mixture
 from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -10,8 +10,10 @@ app = Flask(__name__)
 CORS(app)
 db = {
     table: DB(table)
-    for table in ['books', 'monuments', 'pp']
+    for table in ['checkouts', 'monuments', 'pp']
 }
+LIBRARY = json.load(open('data/library.json', 'r'))
+
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -20,15 +22,37 @@ def checkout():
     and computes a new monuments state"""
     # save new book ids
     book_ids = request.json['ids']
-    db['books'].append(*book_ids)
+    db['checkouts'].append(*book_ids)
 
     # load all book ids and their topic mixtures
-    topic_mixtures = [get_topic_mixture(id) for id in db['books'].all()]
+    topic_mixtures = [LIBRARY['books'][id]['mixture'] for id in db['checkouts'].all()]
 
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)
     db['monuments'].append(monuments_state)
     return jsonify(**monuments_state)
+
+
+@app.route('/books')
+def books():
+    """returns checked-out book ids"""
+    return jsonify(checkouts=list(db['checkouts'].all()))
+
+
+@app.route('/questions/<id>')
+def questions(id):
+    """returns questions given a book id"""
+    book = LIBRARY['books'][id]
+    questions = book.get('questions')
+
+    # if no questions for this book,
+    # get questions for its topics
+    if questions is None:
+        topics = book['topics']
+        questions = []
+        for t in topics:
+            questions.extend(LIBRARY['questions'][t])
+    return jsonify(questions=questions)
 
 
 @app.route('/monuments')
@@ -54,6 +78,3 @@ try:
     proc
 except:
     proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
-
-
-
