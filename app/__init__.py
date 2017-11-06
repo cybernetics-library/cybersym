@@ -12,7 +12,8 @@ db = {
     table: DB(table)
     for table in ['checkouts', 'monuments', 'pp']
 }
-LIBRARY = json.load(open('data/library.json', 'r'))
+LIBRARY = { 'books': {} }
+#LIBRARY = json.load(open('data/library.json', 'r'))
 
 
 @app.route('/checkout', methods=['POST'])
