@@ -12,6 +12,10 @@ PP_API_URL = "http://localhost:5000/pp"
 UPDATE_INTERVAL_SECS = 0.1
 PP_POST_INTERVAL_SECS = 5
 
+POST_TO_PP = False
+GET_FROM_PP = False
+GET_FROM_MONUMENTS = True
+
 #######
 
 def setup():
@@ -19,35 +23,33 @@ def setup():
 
     PreyWorld = World()
 
-    # get graph from `/pp`
-    try: 
-        ppstate = requests.get(PP_API_URL).json()
-        print("LOADING predator_prey state from API")
-        print(ppstate)
-        PreyWorld.import_graph(ppstate)
-        PreyWorld.pprint()
-    except Exception as e:
-        print(e)
+    if(GET_FROM_PP):
+        # get graph from `/pp`
+        try: 
+            ppstate = requests.get(PP_API_URL).json()
+            print("LOADING predator_prey state from API")
+            print(ppstate)
+            PreyWorld.import_graph(ppstate)
+            PreyWorld.pprint()
+        except Exception as e:
+            print(e)
 
     prev_mstate = {}
 
 def update():
     global PreyWorld, this_mstate, prev_mstate
 
-    # get from api
-    this_mstate = requests.get(MONUMENTS_API_URL).json()['state']
-
-    if(this_mstate != prev_mstate): # if state is different
-
-        # convert monument state to relation graphs
-        new_relations = Logic.monument_state_to_relations(this_mstate)
-
-        # convert relation graphs to PreyWorld
-        PreyWorld.replace_edges(new_relations)
-
-        # store previous state so we don't do this over and over again.
-        # although, in theory, nothing goes wrong if we do.
-        prev_mstate = this_mstate
+    if(GET_FROM_MONUMENTS):
+        # get from api
+        this_mstate = requests.get(MONUMENTS_API_URL).json()['state']
+        if(this_mstate != prev_mstate): # if state is different
+            # convert monument state to relation graphs
+            new_relations = Logic.monument_state_to_relations(this_mstate)
+            # convert relation graphs to PreyWorld
+            PreyWorld.replace_edges(new_relations)
+            # store previous state so we don't do this over and over again.
+            # although, in theory, nothing goes wrong if we do.
+            prev_mstate = this_mstate
 
     PreyWorld.update()
 
@@ -64,7 +66,8 @@ def run():
         time.sleep(UPDATE_INTERVAL_SECS - ((time.time() - starttime) % UPDATE_INTERVAL_SECS))
         if(counter >= (PP_POST_INTERVAL_SECS / UPDATE_INTERVAL_SECS)):
             counter = 0
-            update_db_with_world_state()
+            if(POST_TO_PP):
+                update_db_with_world_state()
 
 def update_db_with_world_state():
     G = PreyWorld.export_graph()

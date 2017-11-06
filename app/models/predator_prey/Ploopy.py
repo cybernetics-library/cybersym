@@ -69,7 +69,7 @@ class Ploopy():
             all_node_names.update([k for k, v in nodes_to.items()])
 
         for n in all_node_names:
-            self._create_node_if_none(n, value=1)
+            self._create_node_if_none(n, value=100)
         
     def update(self):
         newG = deepcopy(self.Graph)
@@ -77,17 +77,23 @@ class Ploopy():
         # iterate over each node, then that node's edges.
         # multiply the value of that node with the edge, and add it to the target node's value (in the newG)
         # newG becomes the current graph. 
+        print("before:")
+        for name, node in self.Graph['nodes'].items():
+            print("{} ({})".format(name,  node['value']))
 
         for node_from, nodes_to in self.Graph['edges'].items():
             for node_to, edge_weight in nodes_to.items():
                 if(node_from == node_to):
                     newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * edge_weight 
+                    print("{}  += {} * {}".format(node_to, self.Graph['nodes'][node_from]['value'],  edge_weight ))
                 else:
                     newG['nodes'][node_to]['value'] += self.Graph['nodes'][node_from]['value'] * self.Graph['nodes'][node_to]['value'] * edge_weight 
+                    print("{}  += {} * {} * {}".format(node_to,  self.Graph['nodes'][node_from]['value'], self.Graph['nodes'][node_to]['value'],   edge_weight ))
 
         # round nodes to SIG_FIGS
         for name, node in newG['nodes'].items():
             newG['nodes'][name]['value'] = max(0, round(node['value'], SIG_FIGS))
+            print("{} ({})".format(name,  newG['nodes'][name]['value']))
 
         self.Graph = newG
 
