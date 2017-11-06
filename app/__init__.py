@@ -1,6 +1,5 @@
 import json
 from .db import DB
-from .topics import get_topic_mixture
 from .monuments import compute_monuments_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -23,10 +22,10 @@ def checkout():
     and computes a new monuments state"""
     # save new book ids
     book_ids = request.json['ids']
-    db['books'].append(*book_ids)
+    db['checkouts'].append(*book_ids)
 
     # load all book ids and their topic mixtures
-    topic_mixtures = [get_topic_mixture(id) for id in db['books'].all()]
+    topic_mixtures = [BOOKS[id]['mixture'] for id in db['checkouts'].all()]
 
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)
