@@ -1,3 +1,4 @@
+import json
 from .db import DB
 from .topics import get_topic_mixture
 from .monuments import compute_monuments_state
@@ -10,8 +11,10 @@ app = Flask(__name__)
 CORS(app)
 db = {
     table: DB(table)
-    for table in ['books', 'monuments']
+    for table in ['checkouts', 'monuments']
 }
+BOOKS = json.load(open('data/books.json', 'r'))
+
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
@@ -34,7 +37,7 @@ def checkout():
 @app.route('/books')
 def books():
     """returns checked-out book ids"""
-    return db['books'].all()
+    return jsonify(checkouts=list(db['checkouts'].all()))
 
 
 @app.route('/monuments')
