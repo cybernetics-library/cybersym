@@ -36,7 +36,7 @@ from scipy import integrate
 # Definition of the equations:
 # 
 
-def rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=0.1, f_to_f=1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100):
+def rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=-0.1, f_to_f=-1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100):
     a = r_to_r
     b = f_to_r * -1
     c = f_to_f * -1
@@ -98,7 +98,7 @@ def lotka_volterra_phase_curve(a=1, b=0.1, c=1.5, d=0.15, init_r=10, init_f=10, 
 # This module offers a method named odeint, very easy to use to integrate ODEs:
 # 
 
-    t = np.linspace(0, T_f1 + 0.75,  samples_n)              # time
+    t = np.linspace(0, T_f1 + 1,  samples_n)              # time
     X0 = np.array([init_r, init_f])                     # initials conditions: 10 rabbits and 5 foxes  
 
     X, infodict = integrate.odeint(dX_dt, X0, t, full_output=True)
@@ -107,7 +107,19 @@ def lotka_volterra_phase_curve(a=1, b=0.1, c=1.5, d=0.15, init_r=10, init_f=10, 
 # plot trajectories
     X0 = 0.5 * X_f1                               # starting point
     X = integrate.odeint( dX_dt, X0, t)         # we don't need infodict here
-    return (X[:,0], X[:,1])
+
+    # find where it's periodic
+    a = X[:,0] 
+    b = X[:,1]
+
+    firstp = np.array((a[0], b[0]))
+
+    dists_from_start = [ np.linalg.norm(firstp - x) for x in X[1:]]
+    minindex = dists_from_start.index(min(dists_from_start))
+
+    periodicX = X[:minindex+2] # +1, plus dists_from_start is 1 smaller, so plus 2
+
+    return (periodicX[:,0], periodicX[:,1])
 
 def save_phase_curve_as_svg(r=None, f=None):
     import pylab as p
@@ -130,6 +142,6 @@ def curve_output_rounded(r=None, f=None):
 
 
 if __name__ == "__main__":
-    (r, f) = rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=0.1, f_to_f=1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100)
+    (r, f) = rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=-0.1, f_to_f=-1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100)
     print(curve_output_rounded(r=r, f=f)) #    save_phase_curve_as_svg(r=r, f=f)
 

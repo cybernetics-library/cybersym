@@ -22,7 +22,8 @@ class World:
     def update(self):
         self.WorldPloopy.update()
         self.generations_run += 1
-        (r, f) = lvsolver.rabbit_fox_lotka_volterra_phase_curve(r_to_r=4, f_to_r=-0.4, f_to_f=-0.5, r_to_f=0.019, init_r=10, init_f=10, samples_n=100)
+
+        (r, f) = lvsolver.rabbit_fox_lotka_volterra_phase_curve(r_to_r=4, f_to_r=-0.4, f_to_f=-0.5, r_to_f=0.5, init_r=10, init_f=10, samples_n=100)
         print(lvsolver.curve_output_rounded(r=r, f=f)) #    save_phase_curve_as_svg(r=r, f=f)
 
     def pprint(self):
