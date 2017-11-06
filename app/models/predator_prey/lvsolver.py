@@ -36,6 +36,15 @@ from scipy import integrate
 # Definition of the equations:
 # 
 
+def rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=0.1, f_to_f=1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100):
+    a = r_to_r
+    b = f_to_r * -1
+    c = f_to_f * -1
+    d = r_to_f
+    return lotka_volterra_phase_curve(a=a, b=b, c=c, d=d, init_r=init_r, init_f=init_f, samples_n=samples_n)
+
+
+
 #init_r = initial rabbit population
 #init_f = initial fox population
 def lotka_volterra_phase_curve(a=1, b=0.1, c=1.5, d=0.15, init_r=10, init_f=10, samples_n=100):
@@ -121,6 +130,6 @@ def curve_output_rounded(r=None, f=None):
 
 
 if __name__ == "__main__":
-    (r, f) = lotka_volterra_phase_curve(a=4, b=0.4, c=0.5, d=0.019, init_r=10, init_f=10, samples_n=100)
+    (r, f) = rabbit_fox_lotka_volterra_phase_curve(r_to_r=1, f_to_r=0.1, f_to_f=1.5, r_to_f=0.15, init_r=10, init_f=10, samples_n=100)
     print(curve_output_rounded(r=r, f=f)) #    save_phase_curve_as_svg(r=r, f=f)
 

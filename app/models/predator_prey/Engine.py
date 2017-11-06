@@ -9,7 +9,7 @@ from World import World
 
 MONUMENTS_API_URL = "http://localhost:5000/monuments"
 PP_API_URL = "http://localhost:5000/pp"
-UPDATE_INTERVAL_SECS = 0.1
+UPDATE_INTERVAL_SECS = 1
 PP_POST_INTERVAL_SECS = 5
 
 POST_TO_PP = False
