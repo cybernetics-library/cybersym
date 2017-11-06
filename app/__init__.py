@@ -12,7 +12,7 @@ db = {
     table: DB(table)
     for table in ['checkouts', 'monuments', 'pp']
 }
-BOOKS = json.load(open('data/books.json', 'r'))
+LIBRARY = json.load(open('data/library.json', 'r'))
 
 
 @app.route('/checkout', methods=['POST'])
@@ -25,7 +25,7 @@ def checkout():
     db['checkouts'].append(*book_ids)
 
     # load all book ids and their topic mixtures
-    topic_mixtures = [BOOKS[id]['mixture'] for id in db['checkouts'].all()]
+    topic_mixtures = [LIBRARY['books'][id]['mixture'] for id in db['checkouts'].all()]
 
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)
@@ -37,6 +37,22 @@ def checkout():
 def books():
     """returns checked-out book ids"""
     return jsonify(checkouts=list(db['checkouts'].all()))
+
+
+@app.route('/questions/<id>')
+def questions(id):
+    """returns questions given a book id"""
+    book = LIBRARY['books'][id]
+    questions = book.get('questions')
+
+    # if no questions for this book,
+    # get questions for its topics
+    if questions is None:
+        topics = book['topics']
+        questions = []
+        for t in topics:
+            questions.extend(LIBRARY['questions'][t])
+    return jsonify(questions=questions)
 
 
 @app.route('/monuments')
