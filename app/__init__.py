@@ -78,6 +78,3 @@ try:
     proc
 except:
     proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
-
-
-
