@@ -26,7 +26,7 @@ def checkout():
     db['checkouts'].append(*book_ids)
 
     # load all book ids and their topic mixtures
-    topic_mixtures = [LIBRARY['books'][id]['mixture'] for id in db['checkouts'].all()]
+    topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]
 
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)

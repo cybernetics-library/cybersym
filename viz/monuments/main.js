@@ -7,9 +7,11 @@ const plateauHeight = 25;
 const plateauBase = 25;
 const plateauInset = 2;
 const colors = {
-  'military': 0xef0707,
+  'economy': 0xef0707,
   'biology': 0x09a323,
-  'architecture': 0xe5c212
+  'architecture': 0xe5c212,
+  'society': 0x4286f4,
+  'technology': 0xff87c7
 }
 
 const maxScale = 0.16;
