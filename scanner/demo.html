@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <title>Instascan</title>
+    <script type="text/javascript" src="instascan.min.js"></script>
+  </head>
+  <body>
+    <h3>Try scanning two qr codes at the same time- one of a name, and one of a book.</h3>
+    <video id="preview"></video>
+    <div id="output"></div>
+    <iframe width="100%" height="600px" id="iframe" allowtransparency="true" style="background: #555555;"></iframe>
+    <script type="text/javascript">
+      window.thisbook = "";
+
+      function ifBook(s) {
+        if(s.match(/\d\d\d\d\d\d\d\d/)) { return true; }
+        else { return false; }
+      }
+
+      function ifNotBook(s) {  return !ifBook(s);   }
+
+      function updateIframe(content) {
+        var tinycaturl = "https://www.librarycat.org/lib/CyberneticsCon/item/";
+        var bid = content.filter(ifBook)[0];
+        var name = content.filter(ifNotBook)[0];
+        var s = "";
+        if(bid) { s+= "\nBOOK = " + bid; }
+        if(name) { s+= "\nNAME = " + name; }
+        
+        console.log("book = " + bid + " and name = " + name);
+        $("#output").html(s);
+        if((bid && name) && (window.thisbook != bid)) {
+          $("#iframe").attr("src", "https://www.librarycat.org/lib/CyberneticsCon/item/" + bid);
+          window.thisbook = bid;
+        }
+      }
+      let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+      scanner.addListener('scan', function (content) {
+        console.log(content);
+        updateIframe(content);
+      });
+      Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+          scanner.start(cameras[0]);
+        } else {
+          console.error('No cameras found.');
+        }
+      }).catch(function (e) {
+        console.error(e);
+      });
+    </script>
+  </body>
+</html>
+
