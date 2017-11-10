@@ -11,7 +11,7 @@
             font-family: 'Muli';
         }
 
-        .bubble {
+        #bubble {
           margin: 2em;
           position: fixed;
           height: auto;
@@ -23,6 +23,7 @@
           right: 1em;
           width: 30%;
           top: 10%;
+          display: none;
         }
 
         .tri-right.left-in:after {
@@ -76,7 +77,7 @@
 </head>
 <body>
 <div id="stars">
-<div class="bubble tri-right left-in"><div id="question">Hello World!</div></div>
+<div id="bubble" class="tri-right left-in"><div id="question">Hello World!</div></div>
 <canvas id="earth"></canvas>
 <script src="earth_bundle.js"></script>
 </body>
