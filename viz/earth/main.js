@@ -29,8 +29,7 @@ class Being {
   constructor(popSize, geometry, color, altitude) {
     this.velocity = {
       x: 0,
-      y: 0,
-      z: 0
+      y: 0
     };
 
     var center = {
@@ -63,9 +62,24 @@ class Being {
   }
 
   update() {
-    this.group.rotation.x += this.velocity.x;
-    this.group.rotation.y += this.velocity.y;
-    this.group.rotation.z += this.velocity.z;
+    if (this.velocity.x || this.velocity.y) {
+      this.herd.map(member => {
+        member.s.phi += this.velocity.x;
+        member.s.theta += this.velocity.y;
+        member.position.setFromSpherical(member.s);
+      });
+
+      var o = new THREE.Vector3(0,0,0);
+      var newDir = new THREE.Vector3();
+      var quaternion = new THREE.Quaternion();
+      var rotationAxis = new THREE.Vector3(0,0,1);
+      this.herd.map(member => {
+        var curDir = member.getWorldDirection();
+        newDir.subVectors(member.position, o).normalize();
+        quaternion.setFromUnitVectors(curDir, newDir);
+        member.applyQuaternion(quaternion);
+      });
+    }
   }
 }
 
@@ -112,6 +126,8 @@ function generateTexture(c1, c2) {
 }
 
 
+
+
 class Earth {
   constructor() {
     this._setupScene();
@@ -147,15 +163,13 @@ class Earth {
     people.beings.map(b => {
       b.velocity = {
         x: (Math.random() - 1)/200,
-        y: (Math.random() - 1)/200,
-        z: (Math.random() - 1)/200
+        y: (Math.random() - 1)/200
       }
     });
     birds.beings.map(b => {
       b.velocity = {
         x: (Math.random() - 1)/200,
-        y: (Math.random() - 1)/200,
-        z: (Math.random() - 1)/200
+        y: (Math.random() - 1)/200
       }
     });
     this.systems.push(people);
@@ -173,18 +187,6 @@ class Earth {
         member.applyQuaternion(quaternion);
       });
     });
-    birds.beings.map(b => {
-      var z = new THREE.Vector3(0,0,0);
-      var dir = new THREE.Vector3();
-      var curDir = new THREE.Vector3(0,0,1);
-      var quaternion = new THREE.Quaternion();
-      b.herd.map(member => {
-        dir.subVectors(member.position, z).normalize();
-        quaternion.setFromUnitVectors(curDir, dir);
-        member.applyQuaternion(quaternion);
-      });
-    });
-
   }
 
   render() {
