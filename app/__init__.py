@@ -1,6 +1,7 @@
 import json
 from .db import DB
 from .monuments import compute_monuments_state
+from .pp import compute_pp_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from .params import MONUMENT_NAMES
@@ -66,16 +67,22 @@ def monuments():
 
 @app.route('/pp', methods=['GET', 'POST'])
 def pp():
+    """
     if request.method == 'POST':
         pp_state = request.form
         db['pp'].append(pp_state)
         return jsonify(**pp_state)
+    """
+    if request.method == 'GET':
+        mstate = db['monuments'].last()
+        if mstate is None:
+            mstate = compute_monuments_state([])
+        pp_state = compute_pp_state(mstate)
+        return jsonify(**pp_state)
 
-    else:
-        state = db['pp'].last()
-        return jsonify(**state)
-
+"""
 try:
     proc
 except:
     proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
+"""
