@@ -21,9 +21,8 @@ function shadeColor(color, percent) {
 }
 
 function ask(question) {
-  var el = document.getElementById('question');
-  el.innerHTML = question;
-  el.style.display = 'block';
+  document.getElementById('question').innerHTML = question;
+  document.getElementById('bubble').style.display = 'block';
 }
 
 class Being {
@@ -56,6 +55,8 @@ class Being {
         center.x + (Math.random() - 1)/8,
         center.y + (Math.random() - 1)/8);
       member.position.setFromSpherical(member.s);
+      // var axesHelper = new THREE.AxesHelper(0.1);
+      // member.add(axesHelper);
       this.herd.push(member);
       this.group.add(member);
     }
@@ -108,8 +109,8 @@ function generateTexture(c1, c2) {
 	context.fill();
 
 	return canvas;
-
 }
+
 
 class Earth {
   constructor() {
@@ -119,6 +120,7 @@ class Earth {
     var geometry = new THREE.SphereGeometry(1, 32, 32);
     // var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
     var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading});
+    // var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading, wireframe: true});
 
     var mesh = new THREE.Mesh(geometry, material);
     mesh.scale.set(6,6,6);
@@ -126,6 +128,9 @@ class Earth {
     this.scene.add(mesh);
     this.earth = mesh;
     this.populate();
+
+    // var axesHelper = new THREE.AxesHelper( 5 );
+    // this.scene.add( axesHelper );
   }
 
   populate() {
@@ -157,13 +162,36 @@ class Earth {
     this.systems.push(birds);
     this.systems.push(forests);
     this.systems.map(s => s.beings.map(b => this.earth.add(b.group)));
+    forests.beings.map(b => {
+      var z = new THREE.Vector3(0,0,0);
+      var dir = new THREE.Vector3();
+      var curDir = new THREE.Vector3(0,1,0);
+      var quaternion = new THREE.Quaternion();
+      b.herd.map(member => {
+        dir.subVectors(member.position, z).normalize();
+        quaternion.setFromUnitVectors(curDir, dir);
+        member.applyQuaternion(quaternion);
+      });
+    });
+    birds.beings.map(b => {
+      var z = new THREE.Vector3(0,0,0);
+      var dir = new THREE.Vector3();
+      var curDir = new THREE.Vector3(0,0,1);
+      var quaternion = new THREE.Quaternion();
+      b.herd.map(member => {
+        dir.subVectors(member.position, z).normalize();
+        quaternion.setFromUnitVectors(curDir, dir);
+        member.applyQuaternion(quaternion);
+      });
+    });
+
   }
 
   render() {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
     if (this.earth) {
-      this.earth.rotation.y += 0.001;
+      // this.earth.rotation.y += 0.001;
       this.systems.map(s => s.update());
     }
   }
