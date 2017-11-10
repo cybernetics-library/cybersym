@@ -1,6 +1,7 @@
 from collections import defaultdict
 from functools import reduce
 import copy
+from .lvsolver import lotka_volterra_phase_curve
 
 
 # LOGIC BELOW ###################
@@ -20,10 +21,10 @@ predator_prey_groups= {
 # will be overriden by mstate_to_relations_functions.
 
 default_relations = {
-    "foxes->rabbits": 0,
-    "rabbits->foxes" : 0,
-    "foxes->foxes" : 0,
-    "rabbits->rabbits" : 0,
+    "rabbits->rabbits" : 0.66,
+    "foxes->rabbits": -1.33,
+    "foxes->foxes" : -1,
+    "rabbits->foxes" : 1,
     "anger->joy": 0.1,
     "anger->anger" : 0.1,
     "joy->anger" : 0,
@@ -35,9 +36,9 @@ default_relations = {
 # relation values are all combined together.
 
 mstate_to_relations_functions = {
-    "peace": lambda w: { "foxes->rabbits" : -0.3 * w },
-    "anger": lambda w: { "foxes->rabbits": -0.2 * w },
-    "agriculture": lambda w: { "foxes->rabbits" : -0.3 * w, "rabbits->foxes": 0.8 * w}
+    "peace": lambda w: { "foxes->rabbits" : -0.01 * w },
+    "anger": lambda w: { "foxes->rabbits": -0.01 * w },
+    "agriculture": lambda w: { "foxes->rabbits" : -0.01 * w, "rabbits->foxes": 0.01 * w}
 }
 
 # only used for testing
@@ -82,12 +83,26 @@ def relations_to_groups(relations):
         groups[thisrel]['relations'] = thisvel
 
     for thisrel, thisval in groups.items():
+        # pos/neg is tweaked; may want to use absolute values instead
+        lv_a = thisval["relations"][thisval["prey"] + "->" + thisval["prey"]] 
+        lv_b = -1 * thisval["relations"][thisval["predator"] + "->" + thisval["prey"]] 
+        lv_c = -1 * thisval["relations"][thisval["predator"] + "->" + thisval["predator"]] 
+        lv_d = thisval["relations"][thisval["prey"] + "->" + thisval["predator"]]
+
+        lv_a = max(lv_a, 0.00001)
+        lv_b = max(lv_b, 0.00001)
+        lv_c = max(lv_c, 0.00001)
+        lv_d = max(lv_d, 0.00001)
+
         groups[thisrel]["lv_vars"] = {
-            "a" : thisval["relations"][thisval["prey"] + "->" + thisval["prey"]],
-            "b" : thisval["relations"][thisval["predator"] + "->" + thisval["prey"]],
-            "c" : thisval["relations"][thisval["predator"] + "->" + thisval["predator"]],
-            "d" : thisval["relations"][thisval["prey"] + "->" + thisval["predator"]]
+            "a" : lv_a, 
+            "b" : lv_b,
+            "c" : lv_c,
+            "d" : lv_d
         }
+
+        (r, f) = lotka_volterra_phase_curve(a=lv_a, b=lv_b, c=lv_c, d=lv_d)
+        groups[thisrel]["phase_curve"] = list(zip(r,f))
 
     return groups
 
