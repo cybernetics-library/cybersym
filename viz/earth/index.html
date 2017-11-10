@@ -3,10 +3,60 @@
 <head>
     <meta charset="utf-8"/>
     <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Muli');
         body {
             margin: 0;
             padding: 0;
             background: #000;
+            font-family: 'Muli';
+        }
+
+        .bubble {
+          margin: 2em;
+          position: fixed;
+          height: auto;
+          background-color: lightyellow;
+          vertical-align: top;
+          min-height: 4em;
+          border-radius: 1em;
+          animation: bounceIn 0.5s;
+          right: 1em;
+          width: 30%;
+          top: 10%;
+        }
+
+        .tri-right.left-in:after {
+          content: ' ';
+          position: absolute;
+          width: 0;
+          height: 0;
+          left: -20px;
+          right: auto;
+          top: 24px;
+          bottom: auto;
+          border: 12px solid;
+          border-color: lightyellow lightyellow transparent transparent;
+        }
+
+        .talktext {
+          padding: 1.2em 1em 1em 1em;
+          text-align: left;
+          line-height: 1.5em;
+          position: relative;
+        }
+
+        @keyframes bounceIn {
+          0% {
+            transform: scale(0.1);
+            opacity: 0;
+          }
+          60% {
+            transform: scale(1.1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+          }
         }
 
         #stars {
@@ -26,6 +76,7 @@
 </head>
 <body>
 <div id="stars">
+<div class="bubble tri-right left-in"><div class="talktext">Hello World!</div></div>
 <canvas id="earth"></canvas>
 <script src="earth_bundle.js"></script>
 </body>
