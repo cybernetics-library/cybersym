@@ -2,6 +2,7 @@
 <html>
   <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/3.4.0/lodash.min.js"></script>
     <title>Instascan</title>
     <script type="text/javascript" src="instascan.min.js"></script>
   </head>
@@ -13,31 +14,75 @@
     <script type="text/javascript">
       window.thisbook = "";
 
-      function ifBook(s) {
-        if(s.match(/\d\d\d\d\d\d\d\d/)) { return true; }
+      var sounds_dir = "wavs/";
+      var sounds_meow = ["meow1.wav", "meow2.wav", "meow3.wav", "meow4.wav", "meow5.mp3", "meow6.wav", "meow7.mp3", "meow8.wav", "meow9.wav", "meow10.wav",
+                         "meow11.wav", "meow12.wav", "meow13.wav", "meow14.wav", "meow15.mp3", "meow16.mp3"];
+      var sounds_bell = ["idea.wav"];
+
+			function hashCode(str) {
+					var hash = 0;
+					if (str.length == 0) return hash;
+					for (i = 0; i < str.length; i++) {
+							char = str.charCodeAt(i);
+							hash = ((hash<<5)-hash)+char;
+							hash = hash & hash; // Convert to 32bit integer
+					}
+					return hash;
+			}
+
+
+      function isBook(s) {
+        if(s.match(/\d\d\d\d\d\d\d\d/)) {
+          return true
+        }
         else { return false; }
       }
 
-      function ifNotBook(s) {  return !ifBook(s);   }
+      function isName(s) {  return !isBook(s);   }
+
+      function bookUrlToId(s) {
+        return s.split("/")[s.split("/").length - 1];
+      }
+
+      function parseQR(content) {
+        var res = {};
+        res.books = {};
+        res.names = {};
+        content.forEach(function(d, i) {
+          if(isBook(d)) { res.books[bookUrlToId(d)] = d; }
+          if(isName(d)) { res.names[d] = d; }
+        });
+        return res;
+      }
 
       function updateIframe(content) {
         var tinycaturl = "https://www.librarycat.org/lib/CyberneticsCon/item/";
-        var bid = content.filter(ifBook)[0];
-        var name = content.filter(ifNotBook)[0];
-        var s = "";
-        if(bid) { s+= "\nBOOK = " + bid; }
-        if(name) { s+= "\nNAME = " + name; }
+
+        var res = parseQR(content);
+        window.res = res;
         
-        console.log("book = " + bid + " and name = " + name);
-        $("#output").html(s);
-        if((bid && name) && (window.thisbook != bid)) {
-          $("#iframe").attr("src", "https://www.librarycat.org/lib/CyberneticsCon/item/" + bid);
-          window.thisbook = bid;
+        var thisbookids = Object.keys(res.books).sort()
+
+        var thisbooks = thisbookids.join("+");
+        if((thisbooks) && (window.prevbooks != thisbooks)) {
+
+          var s = "";
+          s+= "\nBOOKs = " + thisbookids.join(", ");
+          s+= "\nNAMEs = " + Object.keys(res.names).join(", ");
+          $("#output").html(s);
+          
+          console.log(s);
+          $("#iframe").attr("src", "https://www.librarycat.org/lib/CyberneticsCon/item/" + thisbookids[0]);
+          window.prevbooks = thisbooks;
+					sound = sounds_meow[hashCode(thisbookids[0]) % sounds_meow.length]
+//          var sound = _.sample(sounds_meow);
+//          var sound = _.sample(sounds_bell);
+          var snd = new Audio(sounds_dir + sound); // buffers automatically when created
+          snd.play();
         }
       }
       let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
       scanner.addListener('scan', function (content) {
-        console.log(content);
         updateIframe(content);
       });
       Instascan.Camera.getCameras().then(function (cameras) {
