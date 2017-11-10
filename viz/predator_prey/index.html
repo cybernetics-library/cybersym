@@ -24,6 +24,9 @@ body {
 .centerdiv {
 }
 
+.rawdata {
+  font-size: 0.1em;
+}
 </style>
 
 <!-- 
@@ -38,7 +41,23 @@ CUSTOMIZE BELOW
 <body>
 <div class="flexcontainer">
 	<div class="centerdiv">
-    <div id="app"> {{ pp }} </div>
+    <div id="app"> 
+    
+      <div v-for="(res, group) in LVphases">
+        {{ group }}:
+
+      <svg width="200" height="200">
+        <g>
+          <path :d="listToPath(100, res)" stroke="black" fill="none"/>
+        </g>
+      </svg>
+
+      </div>
+      <div class="rawdata">
+        {{ rawdata }} 
+      </div>
+
+    </div>
 		Predator-Prey Viz
 	</div>
 </div>

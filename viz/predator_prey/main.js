@@ -3,11 +3,13 @@ import LV from './lotkavolterra';
 
 
 var apiURL = "http://localhost:5000/pp";
-new Vue({
+window.vueapp = new Vue({
   el: '#app',
   data: {
     message: "Vue is working.",
-    pp: null
+    rawdata: null,
+    LVs: null,
+    LVphases: null
   },
   created: function () {
     this.fetchData();
@@ -22,18 +24,35 @@ new Vue({
       var self = this
       xhr.open('GET', apiURL)
       xhr.onload = function () {
-        self.pp = JSON.parse(xhr.responseText);
-        var thisL = new LV({ "data": self.pp['angerjoy'] });
-        console.log(thisL.compute());
-        window.pp = self.pp
-        console.log(self.pp);
+
+        self.rawdata = JSON.parse(xhr.responseText);
+        self.LVs = {};
+        self.LVphases = {};
+
+        _.each(self.rawdata, function(v, k) {
+          var thisL = new LV({ "data": v });
+          self.LVs[k] = thisL;
+          self.LVphases[k] = thisL.precompute({
+            "s_start": 0,
+            "s_end": 10,
+            "s_interval": 0.1
+          });
+        });
+
         console.log("Fetched data from /pp.");
       }
       xhr.send()
     },
-    computeLotkaVolterra: function() {
 
-    }
+		listToPath: function(multi, data) {
+
+      var s = "M" + (multi * data[0][0]) + " " + (multi  * data[0][1]) 
+
+      _.each(data.slice(1), function(d) {
+        s += " L" + (multi * d[0]) + " " + (multi * d[1]);
+      });
+      return s;
+		},
 
   }
 })
