@@ -9,6 +9,12 @@ function uniform(rng) {
   return Math.round(l + Math.random() * (u-l));
 }
 
+// <https://stackoverflow.com/a/13542669/1097920>
+function shadeColor(color, percent) {
+    var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+    return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+}
+
 class Being {
   constructor(popSize, geometry, color, altitude) {
     this.velocity = {
@@ -21,7 +27,12 @@ class Being {
       x: Math.random() * Math.PI*2,
       y: Math.random() * Math.PI*2
     };
-    var material = new THREE.MeshBasicMaterial({color: color});
+    // var material = new THREE.MeshBasicMaterial({color: color});
+    var texture = new THREE.Texture(generateTexture(
+      shadeColor(color, 0.3), shadeColor(color, -0.3)
+    ));
+    texture.needsUpdate = true;
+    var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
 
     this.group = new THREE.Group();
     this.herd = [];
@@ -64,6 +75,30 @@ class System {
   }
 }
 
+function generateTexture(c1, c2) {
+	var size = 512;
+
+	// create canvas
+	var canvas = document.createElement( 'canvas' );
+	canvas.width = size;
+	canvas.height = size;
+
+	// get context
+	var context = canvas.getContext( '2d' );
+
+	// draw gradient
+	context.rect( 0, 0, size, size );
+	// var gradient = context.createRadialGradient(0,0,0,0,size/2,size);
+	var gradient = context.createLinearGradient( 0, 0, size, size );
+	gradient.addColorStop(0, c1);
+	gradient.addColorStop(0.5, c2);
+	gradient.addColorStop(1, c1);
+	context.fillStyle = gradient;
+	context.fill();
+
+	return canvas;
+
+}
 
 class Earth {
   constructor() {
@@ -71,7 +106,9 @@ class Earth {
     this._setupLights();
 
     var geometry = new THREE.SphereGeometry(1, 32, 32);
-    var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
+    // var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
+    var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading});
+
     var mesh = new THREE.Mesh(geometry, material);
     mesh.scale.set(6,6,6);
     // mesh.rotation.set(-0.4,0,-0.4);
@@ -84,30 +121,30 @@ class Earth {
     this.systems = [];
     var forests = new System(24, [5,8],
       new THREE.ConeGeometry(0.02, 0.08, 4),
-      0x10a025, 0);
+      '#10a025', 0);
     var people = new System(12, [5,8],
       new THREE.SphereGeometry(0.02, 32, 4),
-      0x134fb2, 0);
+      '#134fb2', 0);
     var birds = new System(12, [8,16],
       new THREE.ConeGeometry(0.01, 0.03, 4),
-      0xf3ff21, 0.1);
+      '#f3ff21', 0.1);
     people.beings.map(b => {
       b.velocity = {
-        x: (Math.random() - 1)/100,
-        y: (Math.random() - 1)/100,
-        z: (Math.random() - 1)/100
+        x: (Math.random() - 1)/200,
+        y: (Math.random() - 1)/200,
+        z: (Math.random() - 1)/200
       }
     });
     birds.beings.map(b => {
       b.velocity = {
-        x: (Math.random() - 1)/100,
-        y: (Math.random() - 1)/100,
-        z: (Math.random() - 1)/100
+        x: (Math.random() - 1)/200,
+        y: (Math.random() - 1)/200,
+        z: (Math.random() - 1)/200
       }
     });
-    this.systems.push(forests);
     this.systems.push(people);
     this.systems.push(birds);
+    this.systems.push(forests);
     this.systems.map(s => s.beings.map(b => this.earth.add(b.group)));
   }
 
@@ -148,13 +185,7 @@ class Earth {
     this.camera.updateProjectionMatrix();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        if (CAMERATYPE === 'persp') {
-          this.controls.minDistance = 10;
-          this.controls.maxDistance = 50;
-        } else {
-          this.controls.maxZoom = 0.2;
-          this.controls.minZoom = 0.1;
-    }
+    this.controls.enableZoom = false; // to keep speech bubble more consistently placed
 
     var self = this;
     window.addEventListener('resize', function() {
