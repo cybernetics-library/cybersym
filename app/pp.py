@@ -1,15 +1,21 @@
 from collections import defaultdict
 from functools import reduce
+import copy
 
 
 # LOGIC BELOW ###################
 
 # groups of relation. each relation should be a pair.
-groups_of_relations= {
-    "rabbitfoxes": ["foxes", "rabbits"],
-    "angerjoy": ["anger", "joy"],
+predator_prey_groups= {
+    "rabbitfoxes": {
+        "predator": "foxes",
+        "prey": "rabbits",
+    },
+    "angerjoy": {
+        "predator": "anger",
+        "prey": "joy",
     }
-
+}
 # these are default relations. These should only be used to illustrate what edges are going to be used. 
 # will be overriden by mstate_to_relations_functions.
 
@@ -63,13 +69,35 @@ def mstate_weight_to_relation(mstate_key, weight):
 
 def relations_to_groups(relations):
     r = defaultdict(dict)
+
+    # sort relations into groups
     for thisrel, thisval in relations.items():
-        print(thisrel.split("->")[0], thisval)
-        thisgroup = [k for k, v in groups_of_relations.items() if thisrel.split("->")[0] in v]
+        thisgroup = [k for k, v in predator_prey_groups.items() if thisrel.split("->")[0] in [v['predator'], v['prey']]]
         if(len(thisgroup) > 0): 
             r[thisgroup[0]][thisrel] =  thisval
-    return r   
-    
+
+    # insert into groups dict
+    groups = copy.deepcopy(predator_prey_groups)
+    for thisrel, thisvel in r.items():
+        groups[thisrel]['relations'] = thisvel
+
+    for thisrel, thisval in groups.items():
+        groups[thisrel]["lv_vars"] = {
+            "a" : thisval["relations"][thisval["prey"] + "->" + thisval["prey"]],
+            "b" : thisval["relations"][thisval["predator"] + "->" + thisval["prey"]],
+            "c" : thisval["relations"][thisval["predator"] + "->" + thisval["predator"]],
+            "d" : thisval["relations"][thisval["prey"] + "->" + thisval["predator"]]
+        }
+
+    return groups
+
+
+"""
+a is the natural growth rate of prey, (positive)
+b is the death rate per encounter of prey, (negative)
+c is the natural death rate of predators, (negative)
+d is the efficiency of turning predated prey into predators.(positive) 
+"""
 
 def compute_pp_state(mstate):
 

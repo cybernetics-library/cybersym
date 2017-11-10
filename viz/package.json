@@ -12,6 +12,7 @@
     "jquery": "latest",
     "loglevel": "^1.4.1",
     "moment": "^2.17.1",
+    "odex": "^2.0.4",
     "three": "^0.88.0",
     "tracery-grammar": "^2.7.3",
     "tween.js": "^16.6.0",
