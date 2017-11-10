@@ -1,55 +1,114 @@
 import $ from 'jquery';
 import * as THREE from 'three';
+import OrbitControls from './orbit';
 
 const CAMERATYPE = 'persp'; // or 'ortho'
-const loader = new THREE.JSONLoader();
 
-function adjustMaterial(material, emit) {
-  emit = emit || 0;
-  material.shininess = 0;
-  material.shading = THREE.FlatShading;
-  material.map.generateMipmaps = false;
-  material.map.magFilter = THREE.NearestFilter;
-  material.map.minFilter = THREE.NearestFilter;
-  if (emit) {
-    material.emissiveIntensity = emit;
-    material.emissive = {
-      r: 0.45,
-      g: 0.45,
-      b: 0.45
-    };
-  }
+function uniform(rng) {
+  var [l, u] = rng;
+  return Math.round(l + Math.random() * (u-l));
 }
 
-function adjustMaterials(obj, emit) {
-  if (obj.material) {
-    if (obj.material.map) {
-      adjustMaterial(obj.material, emit);
-    } else if (obj.material.materials) {
-      _.each(obj.material.materials, function(mat) {
-        adjustMaterial(mat, emit);
-      });
+class Being {
+  constructor(popSize, geometry, color, altitude) {
+    this.velocity = {
+      x: 0,
+      y: 0,
+      z: 0
+    };
+
+    var center = {
+      x: Math.random() * Math.PI*2,
+      y: Math.random() * Math.PI*2
+    };
+    var material = new THREE.MeshBasicMaterial({color: color});
+
+    this.group = new THREE.Group();
+    this.herd = [];
+    for (var i=0; i<popSize; i++) {
+      var member = new THREE.Mesh(geometry, material);
+      var box = new THREE.Box3().setFromObject(member);
+      var height = box.size().y;
+      member.s = new THREE.Spherical(
+        1+altitude+height/2,
+        center.x + (Math.random() - 1)/8,
+        center.y + (Math.random() - 1)/8);
+      member.position.setFromSpherical(member.s);
+      this.herd.push(member);
+      this.group.add(member);
     }
   }
-  obj.children.map(function(child) {
-    adjustMaterials(child, emit);
-  });
+
+  update() {
+    this.group.rotation.x += this.velocity.x;
+    this.group.rotation.y += this.velocity.y;
+    this.group.rotation.z += this.velocity.z;
+  }
 }
 
-class MainMenu {
+class System {
+  constructor(n, herdSizes, geo, color, altitude) {
+    this.beings = [];
+    for (var i=0; i<n; i++) {
+      var being = new Being(uniform(herdSizes), geo, color, altitude);
+      this.beings.push(being);
+    }
+  }
+
+  setVelocities(velocity) {
+    this.beings.map(b => b.velocity = velocity);
+  }
+
+  update() {
+    this.beings.map(b => b.update());
+  }
+}
+
+
+class Earth {
   constructor() {
     this._setupScene();
     this._setupLights();
 
-    var self = this;
-    loader.load('/earth.json', function(geo, mats) {
-      var mesh = new THREE.Mesh(geo, new THREE.MeshFaceMaterial(mats));
-      adjustMaterials(mesh, 0.35);
-      mesh.scale.set(6,6,6);
-      mesh.rotation.set(-0.4,0,-0.4);
-      self.scene.add(mesh);
-      self.earth = mesh;
-    })
+    var geometry = new THREE.SphereGeometry(1, 32, 32);
+    var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.set(6,6,6);
+    // mesh.rotation.set(-0.4,0,-0.4);
+    this.scene.add(mesh);
+    this.earth = mesh;
+    this.populate();
+  }
+
+  populate() {
+    this.systems = [];
+    var forests = new System(24, [5,8],
+      new THREE.ConeGeometry(0.02, 0.08, 4),
+      0x10a025, 0);
+    var people = new System(12, [5,8],
+      new THREE.SphereGeometry(0.02, 32, 4),
+      0x134fb2, 0);
+    var birds = new System(12, [8,16],
+      new THREE.ConeGeometry(0.01, 0.03, 4),
+      0xf3ff21, 0.1);
+    people.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/100,
+        y: (Math.random() - 1)/100,
+        z: (Math.random() - 1)/100
+      }
+    });
+    birds.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/100,
+        y: (Math.random() - 1)/100,
+        z: (Math.random() - 1)/100
+      }
+    });
+    this.systems.push(forests);
+    this.systems.push(people);
+    this.systems.push(birds);
+    this.systems.map(s => s.beings.map(b => this.earth.add(b.group)));
   }
 
   render() {
@@ -57,6 +116,7 @@ class MainMenu {
     this.renderer.render(this.scene, this.camera);
     if (this.earth) {
       this.earth.rotation.y += 0.001;
+      this.systems.map(s => s.update());
     }
   }
 
@@ -80,12 +140,21 @@ class MainMenu {
       this.camera.zoom = 2;
     } else {
       this.camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000),
-      camera.zoom = 0.08;
+      this.camera.zoom = 0.08;
     }
 
     this.camera.position.set(-20, 20, 20);
     this.camera.lookAt(this.scene.position);
     this.camera.updateProjectionMatrix();
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+        if (CAMERATYPE === 'persp') {
+          this.controls.minDistance = 10;
+          this.controls.maxDistance = 50;
+        } else {
+          this.controls.maxZoom = 0.2;
+          this.controls.minZoom = 0.1;
+    }
 
     var self = this;
     window.addEventListener('resize', function() {
@@ -106,5 +175,5 @@ class MainMenu {
   }
 }
 
-var m = new MainMenu();
-m.render();
+var e = new Earth();
+e.render();
