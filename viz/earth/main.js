@@ -9,10 +9,21 @@ function uniform(rng) {
   return Math.round(l + Math.random() * (u-l));
 }
 
+function choice(choices) {
+  var idx = Math.floor(Math.random() * choices.length);
+  return choices[idx];
+}
+
 // <https://stackoverflow.com/a/13542669/1097920>
 function shadeColor(color, percent) {
     var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
     return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+}
+
+function ask(question) {
+  var el = document.getElementById('question');
+  el.innerHTML = question;
+  el.style.display = 'block';
 }
 
 class Being {
@@ -207,4 +218,10 @@ class Earth {
 }
 
 var e = new Earth();
+fetch('http://localhost:5000/questions/147517853').then(resp => {
+  return resp.json();
+}).then(json => {
+  var question = choice(json.questions);
+  ask(question);
+});
 e.render();
