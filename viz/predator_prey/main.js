@@ -30,13 +30,21 @@ window.vueapp = new Vue({
         self.LVphases = {};
 
         _.each(self.rawdata, function(v, k) {
+
+          // use JS to solve LV          
           var thisL = new LV({ "data": v });
-          self.LVs[k] = thisL;
-          self.LVphases[k] = thisL.precompute({
+          var prec = thisL.precompute({
             "s_start": 0,
             "s_end": 10,
             "s_interval": 0.1
           });
+          self.LVs[k] = thisL;
+          self.LVphases[k] = prec;
+          
+
+          // use API to solve LV          
+          self.LVphases[k] = v.phase_curve;
+
         });
 
         console.log("Fetched data from /pp.");
@@ -47,7 +55,6 @@ window.vueapp = new Vue({
 		listToPath: function(multi, data) {
 
       var s = "M" + (multi * data[0][0]) + " " + (multi  * data[0][1]) 
-
       _.each(data.slice(1), function(d) {
         s += " L" + (multi * d[0]) + " " + (multi * d[1]);
       });

@@ -24,26 +24,17 @@ export default class LV {
 
   precompute(params) {
     var self = this;
-    //console.log(this.data.lv_vars);
-    //this.solver.solve(this.LVFunc, 0, [1, 1], 10, function(n,x0,x1,y) {
-      //console.log(n,x0,x1,y);
-    //}).y
-    //console.log(this.solver.solve(this.LVFunc, 0, [1, 1], 6).y)
-    //var res = _.map(_.range(0, 4, 0.1), function(d, i) {
-      //return self.solver.solve(self.LVFunc, 0, [1, 1], d).y;
-    //});
-    //console.log(res);
-    ////console.log(this.data);
-    //
 
     //defaults
     var s_start = params.s_start || 0;
+    var s_x_start = params.s_x_start || 1;
+    var s_y_start = params.s_y_start || 1;
     var s_end = params.s_end || 10;
     var s_interval = params.s_interval || 0.1;
 
     var k = [];
     this.solver.denseOutput = true;
-    this.solver.solve(this.LVFunc, s_start, [1, 1], s_end, this.solver.grid(s_interval, function(x,y) {
+    this.solver.solve(this.LVFunc, s_start, [s_x_start, s_y_start], s_end, this.solver.grid(s_interval, function(x,y) {
       k.push(y);
     }));
 
