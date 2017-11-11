@@ -4,6 +4,8 @@ import OrbitControls from './orbit';
 
 const CAMERATYPE = 'persp'; // or 'ortho'
 
+
+
 function uniform(rng) {
   var [l, u] = rng;
   return Math.round(l + Math.random() * (u-l));
@@ -46,7 +48,9 @@ class Being {
     this.group = new THREE.Group();
     this.herd = [];
     for (var i=0; i<popSize; i++) {
-      var member = new THREE.Mesh(geometry, material);
+      var thisgeo = geometry.clone();
+      thisgeo.applyMatrix( new THREE.Matrix4().makeRotationX(  Math.PI / 2 ) );
+      var member = new THREE.Mesh(thisgeo, material);
       var box = new THREE.Box3().setFromObject(member);
       var height = box.size().y;
       member.s = new THREE.Spherical(
@@ -74,10 +78,18 @@ class Being {
       var quaternion = new THREE.Quaternion();
       var rotationAxis = new THREE.Vector3(0,0,1);
       this.herd.map(member => {
-        var curDir = member.getWorldDirection();
-        newDir.subVectors(member.position, o).normalize();
-        quaternion.setFromUnitVectors(curDir, newDir);
-        member.applyQuaternion(quaternion);
+
+
+
+        var futureS = new THREE.Spherical(member.s.radius, member.s.phi + (this.velocity.x * 1), member.s.theta + (this.velocity.y * 1));
+        var futureV = new THREE.Vector3();
+        futureV.setFromSpherical(futureS);
+        member.lookAt(futureV);
+
+        //var curDir = member.getWorldDirection();
+        //newDir.subVectors(member.position, o).normalize();
+        //quaternion.setFromUnitVectors(curDir, newDir);
+        //member.applyQuaternion(quaternion);
       });
     }
   }
@@ -158,7 +170,7 @@ class Earth {
       new THREE.SphereGeometry(0.02, 32, 4),
       '#134fb2', 0);
     var birds = new System(12, [8,16],
-      new THREE.ConeGeometry(0.01, 0.03, 4),
+      new THREE.ConeGeometry(0.01, 0.23, 4),
       '#f3ff21', 0.1);
     people.beings.map(b => {
       b.velocity = {
@@ -178,13 +190,10 @@ class Earth {
     this.systems.map(s => s.beings.map(b => this.earth.add(b.group)));
     forests.beings.map(b => {
       var z = new THREE.Vector3(0,0,0);
-      var dir = new THREE.Vector3();
-      var curDir = new THREE.Vector3(0,1,0);
-      var quaternion = new THREE.Quaternion();
       b.herd.map(member => {
-        dir.subVectors(member.position, z).normalize();
-        quaternion.setFromUnitVectors(curDir, dir);
-        member.applyQuaternion(quaternion);
+        var v = new THREE.Vector3();
+        v.subVectors(member.position, z).add(member.position);
+        member.lookAt(v);
       });
     });
   }
