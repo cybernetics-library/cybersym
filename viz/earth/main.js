@@ -264,8 +264,8 @@ class Earth {
 
     var self = this;
     window.addEventListener('resize', function() {
-      var width = mainEl.clientWidth,
-          height = mainEl.clientHeight;
+      var width = window.innerWidth,
+          height = window.innerHeight;
       self.camera.aspect = width/height;
       self.camera.updateProjectionMatrix();
       self.renderer.setSize(width, height);
