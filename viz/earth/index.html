@@ -60,6 +60,14 @@
           }
         }
 
+        #paused {
+            display: none;
+            position: fixed;
+            top: 1em;
+            left: 1em;
+            color: red;
+        }
+
         #stars {
           width: 1px;
           height: 1px;
@@ -76,6 +84,7 @@
     <title>~EARTH~</title>
 </head>
 <body>
+<div id="paused">Paused</div>
 <div id="stars">
 <div id="bubble" class="tri-right left-in"><div id="question">Hello World!</div></div>
 <canvas id="earth"></canvas>

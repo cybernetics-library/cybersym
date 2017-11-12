@@ -2,6 +2,7 @@ import $ from 'jquery';
 import * as THREE from 'three';
 import OrbitControls from './orbit';
 
+var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
 
 function uniform(rng) {
@@ -20,10 +21,36 @@ function shadeColor(color, percent) {
     return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
 }
 
+function Timer(callback, delay) {
+  var timerId, start, remaining = delay;
+  this.pause = function() {
+    window.clearTimeout(timerId);
+    remaining -= new Date() - start;
+    this.paused = true;
+  };
+  this.resume = function() {
+    start = new Date();
+    window.clearTimeout(timerId);
+    timerId = window.setTimeout(callback, remaining);
+    this.paused = false;
+  };
+  this.resume();
+}
+
 function ask(question) {
   document.getElementById('question').innerHTML = question;
   document.getElementById('bubble').style.display = 'block';
 }
+
+function wonder() {
+  timer = new Timer(wonder, 60*1000);
+  fetch('http://localhost:5000/question').then(resp => {
+    return resp.json();
+  }).then(json => {
+    ask(json.question);
+  });
+}
+
 
 class Being {
   constructor(popSize, geometry, color, altitude) {
@@ -124,8 +151,6 @@ function generateTexture(c1, c2) {
 
 	return canvas;
 }
-
-
 
 
 class Earth {
@@ -247,11 +272,19 @@ class Earth {
   }
 }
 
-var e = new Earth();
-fetch('http://localhost:5000/questions/147517853').then(resp => {
-  return resp.json();
-}).then(json => {
-  var question = choice(json.questions);
-  ask(question);
+// pause/resume on
+document.addEventListener('keydown', function(ev) {
+  if (ev.key == ' ') {
+    if (timer.paused) {
+      timer.resume();
+      document.getElementById('paused').style.display = 'none';
+    } else {
+      timer.pause();
+      document.getElementById('paused').style.display = 'block';
+    }
+  }
 });
+
+wonder();
+var e = new Earth();
 e.render();
