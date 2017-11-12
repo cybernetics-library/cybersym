@@ -2,6 +2,7 @@ import os
 import json
 import mmap
 
+
 class DB:
     DIR = 'data/'
 
