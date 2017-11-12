@@ -5,7 +5,6 @@ from .pp import compute_pp_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from .params import MONUMENT_NAMES
-import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -13,8 +12,7 @@ db = {
     table: DB(table)
     for table in ['checkouts', 'monuments', 'pp']
 }
-LIBRARY = { 'books': {} }
-#LIBRARY = json.load(open('data/library.json', 'r'))
+LIBRARY = json.load(open('data/library.json', 'r'))
 
 
 @app.route('/checkout', methods=['POST'])
@@ -86,3 +84,6 @@ try:
 except:
     proc = subprocess.Popen(['python',  'app/models/predator_prey/engine.py'])
 """
+    else:
+        state = db['pp'].last()
+        return jsonify(**state)
