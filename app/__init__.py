@@ -92,6 +92,7 @@ def pp():
         pp_state = request.form
         db['pp'].append(pp_state)
         return jsonify(**pp_state)
+<<<<<<< HEAD
     """
     if request.method == 'GET':
         mstate = db['monuments'].last()
@@ -99,3 +100,9 @@ def pp():
             mstate = compute_monuments_state([])
         pp_state = compute_pp_state(mstate)
         return jsonify(**pp_state)
+=======
+
+    else:
+        state = db['pp'].last()
+        return jsonify(**state)
+>>>>>>> c3a8e9812285c1c7659a80b4c70d5a37a30cbdf2
