@@ -1,4 +1,5 @@
 import json
+import random
 from .db import DB
 from .monuments import compute_monuments_state
 from .pp import compute_pp_state
@@ -13,6 +14,20 @@ db = {
     for table in ['checkouts', 'monuments', 'pp']
 }
 LIBRARY = json.load(open('data/library.json', 'r'))
+
+
+def get_questions(id):
+    book = LIBRARY['books'][id]
+    questions = book.get('questions')
+
+    # if no questions for this book,
+    # get questions for its topics
+    if questions is None:
+        topics = book['topics']
+        questions = []
+        for t in topics:
+            questions.extend(LIBRARY['questions'][t])
+    return questions
 
 
 @app.route('/checkout/<id>', methods=['POST'])
@@ -41,19 +56,24 @@ def books():
     return jsonify(checkouts=list(db['checkouts'].all()))
 
 
+@app.route('/question')
+def question():
+    """returns a question based on what has been checked out"""
+    questions = []
+    for id in set(db['checkouts'].all()):
+        questions.extend(get_questions(id))
+    questions = list(set(questions))
+    if questions:
+        question = random.choice(questions)
+    else:
+        question = 'Hmm...'
+    return jsonify(question=question)
+
+
 @app.route('/questions/<id>')
 def questions(id):
     """returns questions given a book id"""
-    book = LIBRARY['books'][id]
-    questions = book.get('questions')
-
-    # if no questions for this book,
-    # get questions for its topics
-    if questions is None:
-        topics = book['topics']
-        questions = []
-        for t in topics:
-            questions.extend(LIBRARY['questions'][t])
+    questions = get_questions(id)
     return jsonify(questions=questions)
 
 
