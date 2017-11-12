@@ -1,62 +1,234 @@
 import $ from 'jquery';
 import * as THREE from 'three';
+import OrbitControls from './orbit';
 
+var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
-const loader = new THREE.JSONLoader();
 
-function adjustMaterial(material, emit) {
-  emit = emit || 0;
-  material.shininess = 0;
-  material.shading = THREE.FlatShading;
-  material.map.generateMipmaps = false;
-  material.map.magFilter = THREE.NearestFilter;
-  material.map.minFilter = THREE.NearestFilter;
-  if (emit) {
-    material.emissiveIntensity = emit;
-    material.emissive = {
-      r: 0.45,
-      g: 0.45,
-      b: 0.45
-    };
-  }
+
+
+function uniform(rng) {
+  var [l, u] = rng;
+  return Math.round(l + Math.random() * (u-l));
 }
 
-function adjustMaterials(obj, emit) {
-  if (obj.material) {
-    if (obj.material.map) {
-      adjustMaterial(obj.material, emit);
-    } else if (obj.material.materials) {
-      _.each(obj.material.materials, function(mat) {
-        adjustMaterial(mat, emit);
-      });
-    }
-  }
-  obj.children.map(function(child) {
-    adjustMaterials(child, emit);
+function choice(choices) {
+  var idx = Math.floor(Math.random() * choices.length);
+  return choices[idx];
+}
+
+// <https://stackoverflow.com/a/13542669/1097920>
+function shadeColor(color, percent) {
+    var f=parseInt(color.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF;
+    return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+}
+
+function Timer(callback, delay) {
+  var timerId, start, remaining = delay;
+  this.pause = function() {
+    window.clearTimeout(timerId);
+    remaining -= new Date() - start;
+    this.paused = true;
+  };
+  this.resume = function() {
+    start = new Date();
+    window.clearTimeout(timerId);
+    timerId = window.setTimeout(callback, remaining);
+    this.paused = false;
+  };
+  this.resume();
+}
+
+function ask(question) {
+  document.getElementById('question').innerHTML = question;
+  document.getElementById('bubble').style.display = 'block';
+}
+
+function wonder() {
+  timer = new Timer(wonder, 60*1000);
+  fetch('http://localhost:5000/question').then(resp => {
+    return resp.json();
+  }).then(json => {
+    ask(json.question);
   });
 }
 
-class MainMenu {
+
+class Being {
+  constructor(popSize, geometry, color, altitude) {
+    this.velocity = {
+      x: 0,
+      y: 0
+    };
+
+    var center = {
+      x: Math.random() * Math.PI*2,
+      y: Math.random() * Math.PI*2
+    };
+    // var material = new THREE.MeshBasicMaterial({color: color});
+    var texture = new THREE.Texture(generateTexture(
+      shadeColor(color, 0.3), shadeColor(color, -0.3)
+    ));
+    texture.needsUpdate = true;
+    var material = new THREE.MeshBasicMaterial( { map: texture, overdraw: 0.5 } );
+
+    this.group = new THREE.Group();
+    this.herd = [];
+    for (var i=0; i<popSize; i++) {
+      var thisgeo = geometry.clone();
+      thisgeo.applyMatrix( new THREE.Matrix4().makeRotationX(  Math.PI / 2 ) );
+      var member = new THREE.Mesh(thisgeo, material);
+      var box = new THREE.Box3().setFromObject(member);
+      var height = box.size().y;
+      member.s = new THREE.Spherical(
+        1+altitude+height/2,
+        center.x + (Math.random() - 1)/8,
+        center.y + (Math.random() - 1)/8);
+      member.position.setFromSpherical(member.s);
+      // var axesHelper = new THREE.AxesHelper(0.1);
+      // member.add(axesHelper);
+      this.herd.push(member);
+      this.group.add(member);
+    }
+  }
+
+  update() {
+    if (this.velocity.x || this.velocity.y) {
+      this.herd.map(member => {
+        member.s.phi += this.velocity.x;
+        member.s.theta += this.velocity.y;
+        member.position.setFromSpherical(member.s);
+      });
+
+      var o = new THREE.Vector3(0,0,0);
+      var newDir = new THREE.Vector3();
+      var quaternion = new THREE.Quaternion();
+      var rotationAxis = new THREE.Vector3(0,0,1);
+      this.herd.map(member => {
+
+
+
+        var futureS = new THREE.Spherical(member.s.radius, member.s.phi + (this.velocity.x * 1), member.s.theta + (this.velocity.y * 1));
+        var futureV = new THREE.Vector3();
+        futureV.setFromSpherical(futureS);
+        member.lookAt(futureV);
+
+        //var curDir = member.getWorldDirection();
+        //newDir.subVectors(member.position, o).normalize();
+        //quaternion.setFromUnitVectors(curDir, newDir);
+        //member.applyQuaternion(quaternion);
+      });
+    }
+  }
+}
+
+class System {
+  constructor(n, herdSizes, geo, color, altitude) {
+    this.beings = [];
+    for (var i=0; i<n; i++) {
+      var being = new Being(uniform(herdSizes), geo, color, altitude);
+      this.beings.push(being);
+    }
+  }
+
+  setVelocities(velocity) {
+    this.beings.map(b => b.velocity = velocity);
+  }
+
+  update() {
+    this.beings.map(b => b.update());
+  }
+}
+
+function generateTexture(c1, c2) {
+	var size = 512;
+
+	// create canvas
+	var canvas = document.createElement( 'canvas' );
+	canvas.width = size;
+	canvas.height = size;
+
+	// get context
+	var context = canvas.getContext( '2d' );
+
+	// draw gradient
+	context.rect( 0, 0, size, size );
+	// var gradient = context.createRadialGradient(0,0,0,0,size/2,size);
+	var gradient = context.createLinearGradient( 0, 0, size, size );
+	gradient.addColorStop(0, c1);
+	gradient.addColorStop(0.5, c2);
+	gradient.addColorStop(1, c1);
+	context.fillStyle = gradient;
+	context.fill();
+
+	return canvas;
+}
+
+
+class Earth {
   constructor() {
     this._setupScene();
     this._setupLights();
 
-    var self = this;
-    loader.load('/earth.json', function(geo, mats) {
-      var mesh = new THREE.Mesh(geo, new THREE.MeshFaceMaterial(mats));
-      adjustMaterials(mesh, 0.35);
-      mesh.scale.set(6,6,6);
-      mesh.rotation.set(-0.4,0,-0.4);
-      self.scene.add(mesh);
-      self.earth = mesh;
-    })
+    var geometry = new THREE.SphereGeometry(1, 32, 32);
+    // var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
+    var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading});
+    // var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading, wireframe: true});
+
+    var mesh = new THREE.Mesh(geometry, material);
+    mesh.scale.set(6,6,6);
+    // mesh.rotation.set(-0.4,0,-0.4);
+    this.scene.add(mesh);
+    this.earth = mesh;
+    this.populate();
+
+    // var axesHelper = new THREE.AxesHelper( 5 );
+    // this.scene.add( axesHelper );
+  }
+
+  populate() {
+    this.systems = [];
+    var forests = new System(24, [5,8],
+      new THREE.ConeGeometry(0.02, 0.08, 4),
+      '#10a025', 0);
+    var people = new System(12, [5,8],
+      new THREE.SphereGeometry(0.02, 32, 4),
+      '#134fb2', 0);
+    var birds = new System(12, [8,16],
+      new THREE.ConeGeometry(0.01, 0.23, 4),
+      '#f3ff21', 0.1);
+    people.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/200,
+        y: (Math.random() - 1)/200
+      }
+    });
+    birds.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/200,
+        y: (Math.random() - 1)/200
+      }
+    });
+    this.systems.push(people);
+    this.systems.push(birds);
+    this.systems.push(forests);
+    this.systems.map(s => s.beings.map(b => this.earth.add(b.group)));
+    forests.beings.map(b => {
+      var z = new THREE.Vector3(0,0,0);
+      b.herd.map(member => {
+        var v = new THREE.Vector3();
+        v.subVectors(member.position, z).add(member.position);
+        member.lookAt(v);
+      });
+    });
   }
 
   render() {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
     if (this.earth) {
-      this.earth.rotation.y += 0.001;
+      // this.earth.rotation.y += 0.001;
+      this.systems.map(s => s.update());
     }
   }
 
@@ -80,17 +252,20 @@ class MainMenu {
       this.camera.zoom = 2;
     } else {
       this.camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000),
-      camera.zoom = 0.08;
+      this.camera.zoom = 0.08;
     }
 
     this.camera.position.set(-20, 20, 20);
     this.camera.lookAt(this.scene.position);
     this.camera.updateProjectionMatrix();
 
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableZoom = false; // to keep speech bubble more consistently placed
+
     var self = this;
     window.addEventListener('resize', function() {
-      var width = mainEl.clientWidth,
-          height = mainEl.clientHeight;
+      var width = window.innerWidth,
+          height = window.innerHeight;
       self.camera.aspect = width/height;
       self.camera.updateProjectionMatrix();
       self.renderer.setSize(width, height);
@@ -106,5 +281,19 @@ class MainMenu {
   }
 }
 
-var m = new MainMenu();
-m.render();
+// pause/resume on
+document.addEventListener('keydown', function(ev) {
+  if (ev.key == ' ') {
+    if (timer.paused) {
+      timer.resume();
+      document.getElementById('paused').style.display = 'none';
+    } else {
+      timer.pause();
+      document.getElementById('paused').style.display = 'block';
+    }
+  }
+});
+
+wonder();
+var e = new Earth();
+e.render();
