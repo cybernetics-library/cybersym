@@ -76,7 +76,7 @@
           window.prevbooks = thisbooks;
 					sound = sounds_meow[hashCode(thisbookids[0]) % sounds_meow.length]
 //          var sound = _.sample(sounds_meow);
-//          var sound = _.sample(sounds_bell);
+          var sound = _.sample(sounds_bell);
           var snd = new Audio(sounds_dir + sound); // buffers automatically when created
           snd.play();
         }

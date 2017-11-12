@@ -9,14 +9,17 @@ window.vueapp = new Vue({
     message: "Vue is working.",
     rawdata: null,
     LVs: null,
-    LVphases: null
+    LVphases: null,
+    LVlocations: null,
+    counter: 0
   },
   created: function () {
     this.fetchData();
-    this.timer = setInterval(this.fetchData, 30 * 1000)
+    this.fetchTimer = setInterval(this.fetchData, 30 * 1000)
+    this.updateTimer = setInterval(this.updateLoop, 5 * 10)
   },
   beforeDestroy: function() {
-    clearInterval(this.timer);
+    clearInterval(this.fetchTimer);
   },
   methods: {
     fetchData: function () {
@@ -28,6 +31,7 @@ window.vueapp = new Vue({
         self.rawdata = JSON.parse(xhr.responseText);
         self.LVs = {};
         self.LVphases = {};
+        self.LVlocations = {};
 
         _.each(self.rawdata, function(v, k) {
 
@@ -60,6 +64,16 @@ window.vueapp = new Vue({
       });
       return s;
 		},
+
+    updateLoop: function () {
+      var self = this;
+      this.counter += 1;
+
+      _.each(self.LVphases, function(v, k) {
+        self.$set(self.LVlocations, k, v[self.counter % v.length])
+      });
+    }
+
 
   }
 })

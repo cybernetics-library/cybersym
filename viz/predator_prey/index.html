@@ -14,11 +14,6 @@ body {
 	height: 100%;
 }
 .flexcontainer {
-	height:100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: row;
 }
 
 .centerdiv {
@@ -26,6 +21,7 @@ body {
 
 .rawdata {
   font-size: 0.1em;
+    display: none;
 }
 </style>
 
@@ -42,16 +38,32 @@ CUSTOMIZE BELOW
 <div class="flexcontainer">
 	<div class="centerdiv">
     <div id="app"> 
-    
-      <div v-for="(res, group) in LVphases">
-        {{ group }}:
+   
+      <div class="LVlocations">
+      </div>
+      <div class="LVphases">
+        <div v-for="(res, group) in LVphases">
 
-      <svg width="200" height="200">
-        <g>
-          <path :d="listToPath(100, res)" stroke="black" fill="none"/>
-        </g>
-      </svg>
+          {{ group }}:
+        <br>
+        <svg width="200" height="200">
+          <g>
+            <path :d="listToPath(100, res)" stroke="black" fill="none"/>
+            <circle :cx="LVlocations[group][0] * 100"
+                    :cy="LVlocations[group][1] * 100"
+                     r="4" stroke="black" stroke-width="1.5" fill="purple" />
+            <circle cx="50"
+                    cy="50"
+                    :r="LVlocations[group][0] * 10"
+                    stroke="black" stroke-width="1.5" fill="blue" />
+            <circle cx="50"
+                    cy="150"
+                    :r="LVlocations[group][1] * 10"
+                    stroke="black" stroke-width="1.5" fill="red" />
+          </g>
+        </svg>
 
+        </div>
       </div>
       <div class="rawdata">
         {{ rawdata }} 
