@@ -15,14 +15,13 @@ db = {
 LIBRARY = json.load(open('data/library.json', 'r'))
 
 
-@app.route('/checkout', methods=['POST'])
-def checkout():
-    """accepts a list of book ids at the key `ids`,
-    then loads their topic mixtures
+@app.route('/checkout/<id>', methods=['POST'])
+def checkout(id):
+    """accepts a book id,
+    loads its topic mixtures
     and computes a new monuments state"""
     # save new book ids
-    book_ids = request.json['ids']
-    db['checkouts'].append(*book_ids)
+    db['checkouts'].append(id)
 
     # load all book ids and their topic mixtures
     topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]
@@ -30,7 +29,10 @@ def checkout():
     # compute new monuments state and save to db
     monuments_state = compute_monuments_state(topic_mixtures)
     db['monuments'].append(monuments_state)
-    return jsonify(**monuments_state)
+
+    # return book info
+    book = LIBRARY['books'][id]
+    return jsonify(**book)
 
 
 @app.route('/books')
