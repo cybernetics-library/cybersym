@@ -1,3 +1,43 @@
+
+
+# groups of relation. each relation should be a pair.
+PP_GROUPS = {
+    "rabbitfoxes": {
+        "predator": "foxes",
+        "prey": "rabbits",
+    },
+    "angerjoy": {
+        "predator": "anger",
+        "prey": "joy",
+    }
+}
+# these are default relations. These should only be used to illustrate what edges are going to be used. 
+# will be overriden by mstate_to_relations_functions.
+
+PP_DEFAULT_RELATIONS = {
+    "rabbits->rabbits" : 0.66,
+    "foxes->rabbits": -1.33,
+    "foxes->foxes" : -1,
+    "rabbits->foxes" : 1,
+    "anger->joy": 0.1,
+    "anger->anger" : 0.1,
+    "joy->anger" : 0,
+    "joy->joy" : 0
+}
+
+# example: "monument factor": { "relation": "increase"}
+# contains functions for converting monument state into relation.
+# relation values are all combined together.
+
+PP_MSTATE_TO_RELATIONS_FUNCTIONS = {
+    "peace": lambda w: { "foxes->rabbits" : -0.01 * w },
+    "anger": lambda w: { "foxes->rabbits": -0.01 * w },
+    "agriculture": lambda w: { "foxes->rabbits" : -0.01 * w, "rabbits->foxes": 0.01 * w}
+}
+
+##
+
+
 MONUMENT_NAMES = {
     'society': 'Monument to Peace and Balance',
     'biology': 'Monument to Flourishing Fauna',
@@ -55,7 +95,7 @@ MONUMENT_TOPICS = {
     },
     'contemplation': {
         'humanities': 0.5,
-        'systems': 0.2
+        'systems': 0.2,
         'cognition': 0.7,
     },
     'play': {

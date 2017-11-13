@@ -2,44 +2,7 @@ from collections import defaultdict
 from functools import reduce
 import copy
 from .lvsolver import lotka_volterra_phase_curve
-
-
-# LOGIC BELOW ###################
-
-# groups of relation. each relation should be a pair.
-predator_prey_groups= {
-    "rabbitfoxes": {
-        "predator": "foxes",
-        "prey": "rabbits",
-    },
-    "angerjoy": {
-        "predator": "anger",
-        "prey": "joy",
-    }
-}
-# these are default relations. These should only be used to illustrate what edges are going to be used. 
-# will be overriden by mstate_to_relations_functions.
-
-default_relations = {
-    "rabbits->rabbits" : 0.66,
-    "foxes->rabbits": -1.33,
-    "foxes->foxes" : -1,
-    "rabbits->foxes" : 1,
-    "anger->joy": 0.1,
-    "anger->anger" : 0.1,
-    "joy->anger" : 0,
-    "joy->joy" : 0
-}
-
-# example: "monument factor": { "relation": "increase"}
-# contains functions for converting monument state into relation.
-# relation values are all combined together.
-
-mstate_to_relations_functions = {
-    "peace": lambda w: { "foxes->rabbits" : -0.01 * w },
-    "anger": lambda w: { "foxes->rabbits": -0.01 * w },
-    "agriculture": lambda w: { "foxes->rabbits" : -0.01 * w, "rabbits->foxes": 0.01 * w}
-}
+from .params import PP_MSTATE_TO_RELATIONS_FUNCTIONS, PP_DEFAULT_RELATIONS, PP_GROUPS 
 
 # only used for testing
 DEBUG_OVERRIDE = False
@@ -63,8 +26,8 @@ def combine_dicts(a, b):
 
 
 def mstate_weight_to_relation(mstate_key, weight):
-    if(mstate_key in mstate_to_relations_functions):
-        return mstate_to_relations_functions[mstate_key](weight)
+    if(mstate_key in PP_MSTATE_TO_RELATIONS_FUNCTIONS):
+        return PP_MSTATE_TO_RELATIONS_FUNCTIONS[mstate_key](weight)
     else:
         return {}
 
@@ -73,12 +36,12 @@ def relations_to_groups(relations):
 
     # sort relations into groups
     for thisrel, thisval in relations.items():
-        thisgroup = [k for k, v in predator_prey_groups.items() if thisrel.split("->")[0] in [v['predator'], v['prey']]]
+        thisgroup = [k for k, v in PP_GROUPS.items() if thisrel.split("->")[0] in [v['predator'], v['prey']]]
         if(len(thisgroup) > 0): 
             r[thisgroup[0]][thisrel] =  thisval
 
     # insert into groups dict
-    groups = copy.deepcopy(predator_prey_groups)
+    groups = copy.deepcopy(PP_GROUPS)
     for thisrel, thisvel in r.items():
         groups[thisrel]['relations'] = thisvel
 
@@ -122,7 +85,8 @@ def compute_pp_state(mstate):
         #translate
         r = [mstate_weight_to_relation(mkey, mval) for mkey, mval in mstate.items()]
         # merge all keys
-        r = reduce(lambda a, b: combine_dicts(a, b), r, default_relations)
+
+        r = reduce(lambda a, b: combine_dicts(a, b), r, PP_DEFAULT_RELATIONS)
         # group into relations
         r = relations_to_groups(r)
         return r
