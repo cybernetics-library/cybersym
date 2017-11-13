@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 db = {
     table: DB(table)
-    for table in ['checkouts', 'monuments', 'pp']
+    for table in ['checkouts']
 }
 LIBRARY = json.load(open('data/library.json', 'r'))
 
@@ -32,21 +32,14 @@ def get_questions(id):
 
 @app.route('/checkout/<id>', methods=['POST'])
 def checkout(id):
-    """accepts a book id,
-    loads its topic mixtures
-    and computes a new monuments state"""
+    """records a checkout for a attendee and station"""
     # save new book ids
-    print(id)
-    db['checkouts'].append(id)
-
-    print(LIBRARY['books'][id]['topics'])
-
-    # load all book ids and their topic mixtures
-    topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]
-
-    # compute new monuments state and save to db
-    monuments_state = compute_monuments_state(topic_mixtures)
-    db['monuments'].append(monuments_state)
+    data = request.json()
+    db['checkouts'].append({
+        'book_id': id,
+        'attendee_id': data['attendee_id'],
+        'station_id': data['station_id']
+    })
 
     # return book info
     book = LIBRARY['books'][id]
