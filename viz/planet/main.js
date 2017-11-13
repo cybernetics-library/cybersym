@@ -5,7 +5,9 @@ const hostname = 'anarres';
 const apiURL = `http://library.cybernetics.social/checkouts/${hostname}`;
 //const apiURL = `http://library.cybernetics.social/checkouts/${hostname}`;
 
-const colors = {
+const PLANET_RADIUS = 6;
+const PLANET_PADDING = 2;
+const COLORS = {
   'economy': 0xef0707,
   'biology': 0x09a323,
   'architecture': 0xe5c212,
@@ -28,7 +30,7 @@ function choice(choices) {
 }
 
 function genMat(topic) {
-  var color = colors[topic];
+  var color = COLORS[topic];
   var mat = new THREE.MeshLambertMaterial({color: color, refractionRatio: 0.95});
   mat.emissiveIntensity = 0.6;
   mat.emissive = {
@@ -55,7 +57,6 @@ function genObject(topic) {
   obj.rotation.set(rand(-3, 3), rand(-3, 3), rand(-3,3));
   return obj;
 }
-
 
 class Planet {
   constructor() {
@@ -92,7 +93,7 @@ class Planet {
     var skybox = new THREE.Mesh(skygeo, skymat);
     scene.add(skybox);
 
-    var geometry = new THREE.SphereGeometry(6, 48, 48);
+    var geometry = new THREE.SphereGeometry(PLANET_RADIUS, 48, 48);
     var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading});
     var mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
@@ -104,37 +105,10 @@ class Planet {
 
     // TODO testing
     setInterval(() => {
-    var obj = genObject(choice(['biology', 'architecture', 'society', 'technology', 'economy']));
-    var pos = {
-      x: choice([randInt(-20, -8), randInt(8, 20)]),
-      y: choice([randInt(-20, -8), randInt(8, 20)]),
-      z: choice([randInt(-20, -8), randInt(8, 20)])
-    };
-    obj.position.set(pos.x, pos.y, pos.z);
-    obj.scale.set(0,0,0);
-    this.planet.add(obj);
-    // find closest point on sphere
-    var vec = new THREE.Vector3();
-    vec.sub(obj.position, new THREE.Vector3(0,0,0));
-    vec.normalize();
-    vec.multiplyScalar(6.5);
-    var geo = new THREE.SphereGeometry(0.2, 16, 16);
-    var material = new THREE.MeshPhongMaterial({color: 0xff0000, shading: THREE.FlatShading});
-    var mesh = new THREE.Mesh(geo, material);
-    mesh.position.set(vec.x, vec.y, vec.z);
-    this.planet.add(mesh);
-    console.log(vec);
-    new TWEEN.Tween(obj.scale).to({x:1, y:1, z:1}, 2000)
-      .easing(TWEEN.Easing.Elastic.Out).chain(
-        new TWEEN.Tween(obj.position).to(vec, 1000)
-        .easing(TWEEN.Easing.Exponential.In),
-        new TWEEN.Tween(obj.rotation).to({
-          x: randInt(-2, 2),
-          y: randInt(-2, 2),
-          z: randInt(-2, 2)}, 1000)
-        .easing(TWEEN.Easing.Exponential.In)
-      ).delay(1000).start();
+      var topic = choice(['biology', 'architecture', 'society', 'technology', 'economy']);
+      this.spawnAndCrashObj(topic);
     }, 2000);
+
   }
 
   initComponents() {
@@ -213,6 +187,53 @@ class Planet {
     this.update();
     TWEEN.update();
   }
+
+  spawnAndCrashObj(topic) {
+    var obj = genObject(topic);
+
+    // select random spawn point safely off-world
+    var pos = {
+      x: choice([randInt(-20, -PLANET_RADIUS-PLANET_PADDING), randInt(PLANET_RADIUS+PLANET_PADDING, 20)]),
+      y: choice([randInt(-20, -PLANET_RADIUS-PLANET_PADDING), randInt(PLANET_RADIUS+PLANET_PADDING, 20)]),
+      z: choice([randInt(-20, -PLANET_RADIUS-PLANET_PADDING), randInt(PLANET_RADIUS+PLANET_PADDING, 20)])
+    };
+    obj.position.set(pos.x, pos.y, pos.z);
+
+    // so it pops into existence
+    obj.scale.set(0,0,0);
+
+    // add as child to planet so it follows rotation
+    this.planet.add(obj);
+
+    // find closest point on sphere
+    var vec = new THREE.Vector3();
+    vec.sub(obj.position, new THREE.Vector3(0,0,0));
+    vec.normalize();
+    vec.multiplyScalar(PLANET_RADIUS);
+
+    if (DEBUG) {
+      // mark where object will hit
+      var geo = new THREE.SphereGeometry(0.2, 16, 16);
+      var material = new THREE.MeshPhongMaterial({color: 0xff0000, shading: THREE.FlatShading});
+      var mesh = new THREE.Mesh(geo, material);
+      mesh.position.set(vec.x, vec.y, vec.z);
+      this.planet.add(mesh);
+    }
+
+    // animate: spawn (scale), crashing (rotation and position)
+    new TWEEN.Tween(obj.scale).to({x:1, y:1, z:1}, 2000)
+      .easing(TWEEN.Easing.Elastic.Out).chain(
+        new TWEEN.Tween(obj.position).to(vec, 1000)
+        .easing(TWEEN.Easing.Exponential.In),
+        new TWEEN.Tween(obj.rotation).to({
+          x: randInt(-2, 2),
+          y: randInt(-2, 2),
+          z: randInt(-2, 2)}, 1000)
+        .easing(TWEEN.Easing.Exponential.In)
+      ).delay(1000).start();
+}
+
+
 }
 
 var scene = new Planet();
