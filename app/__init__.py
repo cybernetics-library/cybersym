@@ -40,13 +40,11 @@ def sum_dicts(*dicts):
     return sum
 
 
-
 def mix_topics(*topic_mixtures):
     """compute aggregate topic mixture"""
     topic_mixture = sum_dicts(*topic_mixtures)
     total = sum(topic_mixture.values())
     return {t: v/total for t, v in topic_mixture}
-
 
 
 @app.route('/checkout/<id>', methods=['POST'])
