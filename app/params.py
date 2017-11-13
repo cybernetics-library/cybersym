@@ -1,28 +1,30 @@
 
-
 # groups of relation. each relation should be a pair.
+
+PP_NAMES = {
+    "friendsdrama": "The Cycle of Friends and Drama"
+}
+
 PP_GROUPS = {
     "rabbitfoxes": {
         "predator": "foxes",
         "prey": "rabbits",
     },
-    "angerjoy": {
-        "predator": "anger",
-        "prey": "joy",
+    "friendsdrama": {
+        "predator": "drama",
+        "prey": "friends",
     }
 }
-# these are default relations. These should only be used to illustrate what edges are going to be used. 
-# will be overriden by mstate_to_relations_functions.
-
+# these are default relations. any relation that doesn't exist will default to 0.
 PP_DEFAULT_RELATIONS = {
     "rabbits->rabbits" : 0.66,
     "foxes->rabbits": -1.33,
     "foxes->foxes" : -1,
     "rabbits->foxes" : 1,
-    "anger->joy": 0.1,
-    "anger->anger" : 0.1,
-    "joy->anger" : 0,
-    "joy->joy" : 0
+    "drama->friends": 0.1,
+    "drama->drama" : 0.1,
+    "friends->drama" : 0,
+    "friends->friends" : 0
 }
 
 # example: "monument factor": { "relation": "increase"}
@@ -30,9 +32,14 @@ PP_DEFAULT_RELATIONS = {
 # relation values are all combined together.
 
 PP_MSTATE_TO_RELATIONS_FUNCTIONS = {
-    "peace": lambda w: { "foxes->rabbits" : -0.01 * w },
-    "anger": lambda w: { "foxes->rabbits": -0.01 * w },
-    "agriculture": lambda w: { "foxes->rabbits" : -0.01 * w, "rabbits->foxes": 0.01 * w}
+    "peacebalance": lambda w: { "foxes->rabbits" : -10.01 * w },
+    "flourishingfauna": lambda w: { "foxes->rabbits" : -0.01 * w,
+        "rabbits->foxes": 0.01 * w },
+    "shelterhearth": lambda w: { },
+    "productiveexchange": lambda w: { "friends->friends": 0.1 * w },
+    "knowledgecomputation": lambda w: { },
+    "contemplation": lambda w: { },
+    "play": lambda w: { "friends->friends": 0.1 * w },
 }
 
 ##
@@ -42,13 +49,15 @@ MONUMENT_NAMES = {
     'peacebalance': 'Monument to Peace and Balance',
     'flourishingfauna': 'Monument to Flourishing Fauna',
     'shelterhearth': 'Monument to Shelter\'s Hearth',
-    'productivexchange': 'Monument to Productive Exchange',
+    'productiveexchange': 'Monument to Productive Exchange',
     'knowledgecomputation': 'Monument to Knowledge and Computation',
     'contemplation': 'Monument to Self-Contemplation',
-    'play': 'Monument to Play and Cooperation'
+    'play': 'Monument to Play and Cooperation',
+    'viableutopias': 'Monument to Viable Utopias'
 }
 
 """
+all topics: 
 architecture
 art
 business
@@ -102,6 +111,14 @@ MONUMENT_TOPICS = {
         'society': 0.4,
         'humanities': 0.3,
         'art': 0.5,
+    },
+    'viableutopias': {
+        'society': 0.4,
+        'systems': 0.3,
+        'economics': 0.5,
+        'politics': 0.3,
+        'business': 0.3,
+        'architecture': 0.1
     }
 }
 

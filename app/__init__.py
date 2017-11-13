@@ -36,10 +36,7 @@ def checkout(id):
     loads its topic mixtures
     and computes a new monuments state"""
     # save new book ids
-    print(id)
     db['checkouts'].append(id)
-
-    print(LIBRARY['books'][id]['topics'])
 
     # load all book ids and their topic mixtures
     topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]
@@ -88,18 +85,11 @@ def monuments():
     return jsonify(state=state, names=MONUMENT_NAMES)
 
 
-@app.route('/pp', methods=['GET', 'POST'])
+@app.route('/pp', methods=['GET'])
 def pp():
-    """
-    if request.method == 'POST':
-        pp_state = request.form
-        db['pp'].append(pp_state)
-        return jsonify(**pp_state)
-    """
-    if request.method == 'GET':
-        mstate = db['monuments'].last()
-        if mstate is None:
-            mstate = compute_monuments_state([])
-        pp_state = compute_pp_state(mstate)
-        return jsonify(**pp_state)
+    mstate = db['monuments'].last()
+    if mstate is None:
+        mstate = compute_monuments_state([])
+    pp_state = compute_pp_state(mstate)
+    return jsonify(**pp_state)
 
