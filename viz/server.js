@@ -42,6 +42,11 @@ app.get('/monuments', function(req, res){
 });
 
 
+app.get('/planet', function(req, res){
+    res.sendFile(__dirname + '/planet/index.html');
+});
+
+
 ///////// express server a
 var server = http.createServer(app);
 
