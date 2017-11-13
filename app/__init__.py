@@ -63,6 +63,13 @@ def checkout(id):
     return jsonify(**book)
 
 
+@app.route('/checkouts/<id>')
+def checkouts(id):
+    """checkouts for a station id"""
+    checkouts = [c for c in db['checkouts'].all() if c['station_id'] == id]
+    return jsonify(checkouts=checkouts)
+
+
 @app.route('/planets/<id>')
 def planet(id):
     """returns attendee checkout planet info"""
