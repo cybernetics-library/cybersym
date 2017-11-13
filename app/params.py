@@ -3,8 +3,27 @@ MONUMENT_NAMES = {
     'biology': 'Monument to Flourishing Fauna',
     'architecture': 'Monument to Shelter\'s Hearth',
     'economy': 'Monument to Productive Exchange',
-    'technology': 'Monument to Knowledge and Computation'
+    'technology': 'Monument to Knowledge and Computation',
+    'contemplation': 'Monument to Self-Contemplation',
+    'play': 'Monument to Play and Cooperation'
 }
+
+"""
+architecture
+art
+business
+biology
+cognition
+computation
+design
+economics
+humanities
+media
+politics
+society
+systems
+science
+"""
 
 MONUMENT_TOPICS = {
     'society': {
@@ -33,6 +52,16 @@ MONUMENT_TOPICS = {
     'technology': {
         'computation': 0.6,
         'cognition': 0.4
+    },
+    'contemplation': {
+        'humanities': 0.5,
+        'systems': 0.2
+        'cognition': 0.7,
+    },
+    'play': {
+        'society': 0.4,
+        'humanities': 0.3,
+        'art': 0.5,
     }
 }
 

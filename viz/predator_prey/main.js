@@ -1,5 +1,16 @@
 import Vue from 'vue'
 import LV from './lotkavolterra';
+import start from './3d';
+//import cube from './3d.vue';
+
+import VueThreejs from 'vue-threejs'
+Vue.use(VueThreejs)
+
+
+new Vue({
+    el: '#cube',
+    render: h => h(cube)
+});
 
 
 var apiURL = "http://localhost:5000/pp";
@@ -10,13 +21,18 @@ window.vueapp = new Vue({
     rawdata: null,
     LVs: null,
     LVphases: null,
-    LVlocations: null,
+    LVlocations: {},
     counter: 0
   },
   created: function () {
     this.fetchData();
+    this.updateLoop();
     this.fetchTimer = setInterval(this.fetchData, 30 * 1000)
     this.updateTimer = setInterval(this.updateLoop, 5 * 10)
+  },
+  mounted: function() {
+    start();
+
   },
   beforeDestroy: function() {
     clearInterval(this.fetchTimer);
@@ -36,14 +52,14 @@ window.vueapp = new Vue({
         _.each(self.rawdata, function(v, k) {
 
           // use JS to solve LV          
-          var thisL = new LV({ "data": v });
-          var prec = thisL.precompute({
-            "s_start": 0,
-            "s_end": 10,
-            "s_interval": 0.1
-          });
-          self.LVs[k] = thisL;
-          self.LVphases[k] = prec;
+          //var thisL = new LV({ "data": v });
+          //var prec = thisL.precompute({
+            //"s_start": 0,
+            //"s_end": 10,
+            //"s_interval": 0.1
+          //});
+          //self.LVs[k] = thisL;
+          //self.LVphases[k] = prec;
           
 
           // use API to solve LV          

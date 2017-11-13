@@ -49,22 +49,25 @@ CUSTOMIZE BELOW
         <svg width="200" height="200">
           <g>
             <path :d="listToPath(100, res)" stroke="black" fill="none"/>
-            <circle :cx="LVlocations[group][0] * 100"
-                    :cy="LVlocations[group][1] * 100"
-                     r="4" stroke="black" stroke-width="1.5" fill="purple" />
-            <circle cx="50"
-                    cy="50"
-                    :r="LVlocations[group][0] * 10"
-                    stroke="black" stroke-width="1.5" fill="blue" />
-            <circle cx="50"
-                    cy="150"
-                    :r="LVlocations[group][1] * 10"
-                    stroke="black" stroke-width="1.5" fill="red" />
+            <g v-if="group in LVlocations">
+              <circle :cx="LVlocations[group][0] * 100"
+                      :cy="LVlocations[group][1] * 100"
+                       r="4" stroke="black" stroke-width="1.5" fill="purple" />
+              <circle cx="50"
+                      cy="50"
+                      :r="LVlocations[group][0] * 10"
+                      stroke="black" stroke-width="1.5" fill="blue" />
+              <circle cx="50"
+                      cy="150"
+                      :r="LVlocations[group][1] * 10"
+                      stroke="black" stroke-width="1.5" fill="red" />
+            </g>
           </g>
         </svg>
 
         </div>
       </div>
+      <canvas id="earth"></canvas>
       <div class="rawdata">
         {{ rawdata }} 
       </div>
