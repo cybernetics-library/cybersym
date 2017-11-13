@@ -1,7 +1,7 @@
 import TWEEN from 'tween.js';
 import * as THREE from 'three';
 
-const apiURL = "http://localhost:5000/monuments";
+const apiURL = "http://library.cybernetics.social/monuments";
 const plateauRadius = 10;
 const plateauHeight = 25;
 const plateauBase = 25;

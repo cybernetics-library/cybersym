@@ -10,6 +10,11 @@ def sum_dicts(*dicts):
     return sum
 
 
+def clamp(state):
+    """clamp to [0, 1]"""
+    return {k: max(min(v, 1), 0) for k, v in state}
+
+
 def mixture_update(topic_mixture):
     """compute a monument state update
     given a topic mixture"""
@@ -47,4 +52,4 @@ def compute_monuments_state(topic_mixtures):
         # apply the influence update
         state = sum_dicts(state, influence_update)
 
-    return state
+    return clamp(state)
