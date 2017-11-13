@@ -36,7 +36,10 @@ def checkout(id):
     loads its topic mixtures
     and computes a new monuments state"""
     # save new book ids
+    print(id)
     db['checkouts'].append(id)
+
+    print(LIBRARY['books'][id]['topics'])
 
     # load all book ids and their topic mixtures
     topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]

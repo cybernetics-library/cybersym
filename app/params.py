@@ -39,11 +39,11 @@ PP_MSTATE_TO_RELATIONS_FUNCTIONS = {
 
 
 MONUMENT_NAMES = {
-    'society': 'Monument to Peace and Balance',
-    'biology': 'Monument to Flourishing Fauna',
-    'architecture': 'Monument to Shelter\'s Hearth',
-    'economy': 'Monument to Productive Exchange',
-    'technology': 'Monument to Knowledge and Computation',
+    'peacebalance': 'Monument to Peace and Balance',
+    'flourishingfauna': 'Monument to Flourishing Fauna',
+    'shelterhearth': 'Monument to Shelter\'s Hearth',
+    'productivexchange': 'Monument to Productive Exchange',
+    'knowledgecomputation': 'Monument to Knowledge and Computation',
     'contemplation': 'Monument to Self-Contemplation',
     'play': 'Monument to Play and Cooperation'
 }
@@ -66,30 +66,30 @@ science
 """
 
 MONUMENT_TOPICS = {
-    'society': {
+    'peacebalance': {
         'society': 0.5,
         'humanities': 0.15,
         'media': 0.15,
         'art': 0.1
     },
-    'economy': {
+    'productiveexchange': {
         'economics': 0.6,
         'politics': 0.15,
         'systems': 0.1,
         'business': 0.15
     },
-    'biology': {
+    'flourishingfauna': {
         'biology': 0.65,
         'science': 0.2,
         'cognition': 0.05,
         'systems': 0.1
     },
-    'architecture': {
+    'shelterhearth': {
         'architecture': 0.7,
         'design': 0.2,
         'art': 0.1
     },
-    'technology': {
+    'knowledgecomputation': {
         'computation': 0.6,
         'cognition': 0.4
     },
@@ -106,11 +106,11 @@ MONUMENT_TOPICS = {
 }
 
 MONUMENT_GRAPH = {
-    'economy': {
-        'biology': -0.1
+    'productiveexchange': {
+        'flourishingfauna': -0.1
     },
-    'biology': {},
-    'architecture': {},
-    'society': {},
-    'technology': {}
+    'flourishingfauna': {},
+    'shelterhearth': {},
+    'peacebalance': {},
+    'knowledgecomputation': {}
 }
