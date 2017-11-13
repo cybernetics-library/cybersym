@@ -105,6 +105,7 @@ class Monuments {
     this.camera.lookAt(scene.position);
     this.scene = scene;
     this.skybox = skybox;
+    this.plateau = plateau;
   }
 
   initComponents() {
@@ -178,9 +179,10 @@ class Monuments {
               theta = i * (2*Math.PI)/Object.keys(monuments.names).length;
           obj.position.x = Math.cos(theta) * (plateauRadius - plateauInset);
           obj.position.z = Math.sin(theta) * (plateauRadius - plateauInset);
+          obj.position.y = plateauHeight/2;
           obj.rotation.y = rand(-20, 20);
           obj.scale.set(baseScale, baseScale, baseScale);
-          self.scene.add(obj);
+          self.plateau.add(obj);
           self.objs[topic] = obj;
           self.names[obj.uuid] = name;
         }
@@ -212,6 +214,7 @@ class Monuments {
     requestAnimationFrame(this.start.bind(this));
     this.renderer.render(this.scene, this.camera);
     this.skybox.rotation.y += 0.0008;
+    this.plateau.rotation.y += 0.001;
     this.update();
     TWEEN.update();
   }
