@@ -2,7 +2,7 @@ import os
 import qrcode
 from uuid import uuid4
 
-QR_PATH = 'output'
+QR_PATH = 'qrcodes'
 
 
 def gen_qr_code(rawid):
@@ -13,7 +13,7 @@ def gen_qr_code(rawid):
 
 
 if __name__ == '__main__':
-    f = open('output.csv', 'w')
     N_ATTENDEES = 250
     for i in range(N_ATTENDEES):
         id = uuid4().hex
+        gen_qr_code(id)
