@@ -121,7 +121,7 @@ def books():
 def question():
     """returns a question based on what has been checked out"""
     questions = []
-    for id in set(db['checkouts'].all()):
+    for id in set([c['book_id'] for c in db['checkouts'].all()]):
         questions.extend(get_questions(id))
     questions = list(set(questions))
     if questions:
