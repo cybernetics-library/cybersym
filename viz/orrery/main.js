@@ -128,7 +128,7 @@ class Orrery {
       var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "boidGroup" , true).children, true);
       if (intersects.length > 0) {
         var obj = intersects[0].object;
-        this.tooltip.innerHTML = this.names[obj.uuid];
+        this.tooltip.innerHTML = obj.name;
         this.tooltip.style.left = `${ev.clientX + 20}px`;
         this.tooltip.style.top = `${ev.clientY}px`;
         this.tooltip.style.display = 'block';
