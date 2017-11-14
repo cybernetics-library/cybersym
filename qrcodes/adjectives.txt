@@ -28,5 +28,5 @@ Controlled
 Autonomous
 Anarchic
 Circular
-Adapting
+Adaptive
 Evolving
