@@ -44,14 +44,14 @@ def mix_topics(*topic_mixtures):
     """compute aggregate topic mixture"""
     topic_mixture = sum_dicts(*topic_mixtures)
     total = sum(topic_mixture.values())
-    return {t: v/total for t, v in topic_mixture}
+    return {t: v/total for t, v in topic_mixture.items()}
 
 
 @app.route('/checkout/<id>', methods=['POST'])
 def checkout(id):
     """records a checkout for a attendee and station"""
     # save new book ids
-    data = request.json()
+    data = request.get_json()
     db['checkouts'].append({
         'book_id': id,
         'attendee_id': data['attendee_id'],
@@ -74,16 +74,19 @@ def checkouts(id):
 def planet(id):
     """returns attendee checkout planet info"""
     # get topic mixtures for books attendee has checked out
+    checkouts = []
     topic_mixtures = []
     for checkout in db['checkouts'].all():
         if checkout['attendee_id'] == id:
             book_id = checkout['book_id']
-            topic_mixture = LIBRARY['books'][book_id]['topics']
+            book = LIBRARY['books'][book_id]
+            topic_mixture = book['topics']
             topic_mixtures.append(topic_mixture)
+            checkouts.append(checkout)
 
     color = ColorHash(id)
     topic_mixture = mix_topics(*topic_mixtures)
-    return jsonify(color=color.hex, topic_mixture=topic_mixture)
+    return jsonify(color=color.hex, checkouts=checkouts, topic_mixture=topic_mixture)
 
 
 @app.route('/planets')
