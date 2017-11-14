@@ -72,18 +72,35 @@ class Orrery {
     this.planetGroup.name = "planetGroup";
 
 		this.planets = [];
-    this.planetN = 5;
-    for (var i=0; i<this.planetN; i++) {
-      var planet = new Boid({ pos: Boid.randomPos(),
-                            vel: Boid.randomVel(),
+    this.planetN = 2;
+    //for (var i=0; i<this.planetN - 1; i++) {
+      //var planet = new Boid({ pos: Boid.randomPos(),
+                            //vel: Boid.randomVel(),
+                            //rot: Boid.randomRot(),
+                            //mass: 1,
+                            //attr: { color: 0x12FF33,
+                                    //name: "Planet-" + i,
+                                    //planetN: this.planetN } });
+      //this.planets.push(planet);
+    //}
+    var planet = new Boid({ pos: new THREE.Vector3(1,1,1),
+                            vel: new THREE.Vector3(0,-0.005,0),
                             rot: Boid.randomRot(),
                             mass: 3,
-                            attr: { color: 0x12FF33,
-                                    name: "Boid-" + i,
+                            attr: { color: 0x12FFF3,
+                                    name: "Moon",
                                     planetN: this.planetN } });
-      this.planets.push(planet);
-    }
-		this.planets.forEach(p => p.addToScene(this.planetGroup));
+    this.planets.push(planet);
+    var planet = new Boid({ pos: new THREE.Vector3(0,0,0),
+                            vel: new THREE.Vector3(0,0,0),
+                            rot: Boid.randomRot(),
+                            mass: 3000,
+                            attr: { color: 0x12FF33,
+                                    name: "Sun",
+                                    planetN: this.planetN } });
+    this.planets.push(planet);
+
+    this.planets.forEach(p => p.addToScene(this.planetGroup));
 		this.scene.add(this.planetGroup);
 
     window.planets = this.planets;

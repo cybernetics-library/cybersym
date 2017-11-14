@@ -8,15 +8,20 @@ var cohFac = 0.03;
 var aliFac = 0.01;
 var tarFac = 0.1;
 var gravFac = 1.0;
-var maxSpeed = 10.005;
+var maxSpeed = 0.005;
 var maxForce = 0.001;
 
 var debugcounter = 0;
-var gravConstant = 10;
+var gravConstant = 0.0000001;
 
 var bound_width = 1;
 var bound_height = 1;
 var bound_depth = 1;
+
+
+function sphereVolumeToRadius(v) {
+  return Math.pow((3 * v / ( 4 * Math.PI)), 1/3);
+}
 
 class Boid {
 
@@ -37,7 +42,8 @@ class Boid {
     this.aliDist = 1;
 
     //this.geo = new THREE.ConeGeometry(0.05, 0.23, 7) ;
-    this.geo = new THREE.SphereGeometry(0.03, 12, 12);
+    console.log(sphereVolumeToRadius(this.mass));
+    this.geo = new THREE.SphereGeometry(0.04 * sphereVolumeToRadius(this.mass), 12, 12);
     this.material = new THREE.MeshBasicMaterial({color: 0x93bcff});
     this.mesh = new THREE.Mesh(this.geo, this.material);
 
@@ -61,23 +67,25 @@ class Boid {
   static randomPos() {
     var posx = Math.random() * 3 - 1;
     var posy = Math.random() * 3 - 1 ;
-    var posz = Math.random() * 3 - 1 ;
+    var posz = 0; //Math.random() * 3 - 1 ;
     return new THREE.Vector3(posx, posy, posz);
   }
         
   static randomVel() {
-    var amp = 0.01;
+    var amp = 0.31;
     maxSpeed;
     var vel = new THREE.Vector3(Math.random() * amp - (amp / 2),
       Math.random() * amp - (amp / 2),
-      Math.random() * amp - (amp / 2));
+      0//Math.random() * amp - (amp / 2)
+    );
     return vel;
     }
         
   static randomRot() {
     return new THREE.Euler(Math.random() * Math.PI * 2,
               Math.random() * Math.PI * 2,
-              Math.random() * Math.PI * 2);
+              0 //Math.random() * Math.PI * 2
+    );
   }
  
 
@@ -223,19 +231,19 @@ class Boid {
 
     var self = this;
     boids.forEach((b, i) => {
-      console.log(b.name);
-      console.log(self.name);
+      //console.log(b.name);
+      //console.log(self.name);
       if(b.name != self.name) {
         var distSq = self.pos.distanceToSquared(b.pos);
         var target = new THREE.Vector3();
         target.copy( b.pos );
         target.sub(self.pos);
-        // https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
         
-        self.gravityArrows[arrowCounter].setDirection(target);
-        self.gravityArrows[arrowCounter].setLength(target.length());
 
-        target.setLength((gravConstant * self.mass * b.mass) / distSq);
+        // https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
+        target.setLength((gravConstant * b.mass) / distSq);
+        self.gravityArrows[arrowCounter].setDirection(target);
+        self.gravityArrows[arrowCounter].setLength(target.length() * 10000);
         sum.add(target);
 
         arrowCounter ++;
@@ -244,6 +252,8 @@ class Boid {
   
     return sum;
    }
+
+
 
   moveUpdate(boids) {
   
@@ -279,15 +289,16 @@ class Boid {
 
       
     this.vel.add(this.acc);
-    this.vel.clampLength(0, maxSpeed);
+//    this.vel.clampLength(0, maxSpeed);
 
     this.pos.add(this.vel);
 
+
+    // rotate geo
     var quat = new THREE.Quaternion();
     var v = new THREE.Vector3(this.vel.x, this.vel.y, this.vel.z);
     v.normalize();
     quat.setFromUnitVectors(this.vfrom, v);
-    
     this.rot.setFromQuaternion(quat)
 
     this.log(this.helperArrow);
@@ -299,8 +310,8 @@ class Boid {
       arr.position.z = self.pos.z;
     });
 
-    this.helperArrow.setDirection(this.vel);
-    this.helperArrow.setLength(this.vel.length() * 100);
+    this.helperArrow.setDirection(this.acc);
+    this.helperArrow.setLength(this.acc.length() * 100);
     this.helperArrow.position.x = this.pos.x;
     this.helperArrow.position.y = this.pos.y;
     this.helperArrow.position.z = this.pos.z;
