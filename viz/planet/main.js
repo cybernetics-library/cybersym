@@ -13,8 +13,8 @@ class Planet {
     this.attendee_id = attendee_id;
     this.lastHash = md5(attendee_id);
 
-    // this.objs = {};
-    // this.names = {};
+    this.objs = [];
+    this.names = {}; // obj.uuid -> book title
 
     util.request(`${config.API_URL}/planets/${attendee_id}`, (data) => {
       // create the planet
@@ -45,6 +45,8 @@ class Planet {
     // add as child to planet so it follows rotation
     this.planet.add(obj);
     obj.position.set(coords.x, coords.y, coords.z);
+    this.objs.push(obj);
+    this.names[obj.uuid] = checkout['title'];
 
     // find closest point on sphere
     var target = new THREE.Vector3();
@@ -100,6 +102,7 @@ function checkForUpdates() {
         space.scene.remove(planet.planet);
       }
       planet = new Planet(space, lastCheckout.attendee_id);
+      space.planet = planet;
       console.log('new planet!');
     } else if (planet.lastCheckout.book_id != lastCheckout.book_id) {
       // smash it into the planet!!!

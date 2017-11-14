@@ -60,17 +60,16 @@ class Space {
       var raycaster = new THREE.Raycaster();
           raycaster.setFromCamera(mouse, this.camera);
 
-      // TODO this.objs and this.names are on the planet
-      // var intersects = raycaster.intersectObjects(Object.values(this.objs));
-      // if (intersects.length > 0) {
-      //   var obj = intersects[0].object;
-      //   this.tooltip.innerHTML = this.names[obj.uuid];
-      //   this.tooltip.style.left = `${ev.clientX + 20}px`;
-      //   this.tooltip.style.top = `${ev.clientY}px`;
-      //   this.tooltip.style.display = 'block';
-      // } else {
-      //   this.tooltip.style.display = 'none';
-      // }
+      var intersects = raycaster.intersectObjects(Object.values(this.planet.objs));
+      if (intersects.length > 0) {
+        var obj = intersects[0].object;
+        this.tooltip.innerHTML = this.planet.names[obj.uuid];
+        this.tooltip.style.left = `${ev.clientX + 20}px`;
+        this.tooltip.style.top = `${ev.clientY}px`;
+        this.tooltip.style.display = 'block';
+      } else {
+        this.tooltip.style.display = 'none';
+      }
     }, false);
   }
 

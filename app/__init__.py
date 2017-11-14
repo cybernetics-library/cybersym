@@ -73,6 +73,7 @@ def checkouts(id):
             book_id = c['book_id']
             book = LIBRARY['books'][book_id]
             c['topics'] = book['topics']
+            c['title'] = book['title']
             checkouts.append(c)
     return jsonify(checkouts=checkouts)
 
@@ -90,6 +91,7 @@ def planet(id):
             topic_mixture = book['topics']
             topic_mixtures.append(topic_mixture)
             checkout['topics'] = book['topics']
+            checkout['title'] = book['title']
             checkouts.append(checkout)
 
     color = ColorHash(id)
