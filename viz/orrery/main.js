@@ -72,17 +72,21 @@ class Orrery {
     this.planetGroup.name = "planetGroup";
 
 		this.planets = [];
-    for (var i=0; i<10; i++) {
+    this.planetN = 5;
+    for (var i=0; i<this.planetN; i++) {
       var planet = new Boid({ pos: Boid.randomPos(),
                             vel: Boid.randomVel(),
                             rot: Boid.randomRot(),
+                            mass: 3,
                             attr: { color: 0x12FF33,
-                                    name: "Boid-" + i } });
+                                    name: "Boid-" + i,
+                                    planetN: this.planetN } });
       this.planets.push(planet);
     }
 		this.planets.forEach(p => p.addToScene(this.planetGroup));
 		this.scene.add(this.planetGroup);
 
+    window.planets = this.planets;
 
   }
 
