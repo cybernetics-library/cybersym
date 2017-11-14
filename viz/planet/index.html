@@ -20,14 +20,23 @@
             line-height: 1.4;
             position: fixed;
         }
-        .title-tooltip {
-            left: 1em;
+        .tooltip-wrapper {
+            text-align: center;
+            position: fixed;
+            left: 0;
             bottom: 1em;
+            right: 0;
+        }
+        .title-tooltip {
+            position: relative;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-    <div class="tooltip title-tooltip">!YOUR PLANET!</div>
+    <div class="tooltip-wrapper">
+        <div id="planet-name" class="tooltip title-tooltip"></div>
+    </div>
     <script src="planet_bundle.js"></script>
 </body>
 </html>

@@ -42,6 +42,7 @@ class Planet {
     this.space = space;
     this.attendee_id = attendee_id;
     this.lastHash = md5(attendee_id);
+    document.getElementById('planet-name').innerHTML = `Planet ${attendee_id}`;
 
     // this.objs = {};
     // this.names = {};
@@ -57,9 +58,9 @@ class Planet {
       var mesh = new THREE.Mesh(geometry, material);
       this.space.scene.add(mesh);
       this.planet = mesh;
-      var lastCheckout = data.checkouts.pop();
+      this.lastCheckout = data.checkouts.pop();
       data.checkouts.map(c => this.nextEvent(c, false));
-      this.nextEvent(lastCheckout, true); // animate the last checkout
+      this.nextEvent(this.lastCheckout, true); // animate the last checkout
     });
   }
 
@@ -116,14 +117,42 @@ class Planet {
   }
 }
 
+
 var attendee_id = 'test';
 var space = new Space();
-var planet = new Planet(space, attendee_id);
+var planet, lastCheckout;
+var lastTime = Date.now();
+function checkForUpdates() {
+  util.request(`${config.API_URL}/checkouts/${config.HOSTNAME}`, (data) => {
+    var checkouts = data.checkouts;
+    var lastCheckout = checkouts.pop();
+    if (planet === undefined || planet.attendee_id !== lastCheckout.attendee_id) {
+      // destroy previous planet if there is one
+      if (planet) {
+        space.scene.remove(planet.planet);
+      }
+      planet = new Planet(space, attendee_id);
+      console.log('new planet!');
+    } else if (planet.lastCheckout.book_id != lastCheckout.book_id) {
+      // smash it into the planet!!!
+      planet.nextEvent(lastCheckout, true);
+      planet.lastCheckout = lastCheckout;
+      console.log('smash!!!');
+    } else {
+      console.log('nothing new...');
+    }
+  });
+}
+checkForUpdates();
 space.start(function() {
-  if (planet.planet) {
+  if (planet && planet.planet) {
     planet.planet.rotation.y += 0.0008;
   }
 
-  // TODO
   // poll for changes
+  var elapsed = Date.now() - lastTime;
+  if (elapsed > 5000) {
+    checkForUpdates();
+    lastTime = Date.now();
+  }
 });
