@@ -66,7 +66,13 @@ def checkout(id):
 @app.route('/checkouts/<id>')
 def checkouts(id):
     """checkouts for a station id"""
-    checkouts = [c for c in db['checkouts'].all() if c['station_id'] == id]
+    checkouts = []
+    for c in db['checkouts'].all():
+        if c['station_id'] == id:
+            book_id = c['book_id']
+            book = LIBRARY['books'][book_id]
+            c['topics'] = book['topics']
+            checkouts.append(c)
     return jsonify(checkouts=checkouts)
 
 
@@ -82,6 +88,7 @@ def planet(id):
             book = LIBRARY['books'][book_id]
             topic_mixture = book['topics']
             topic_mixtures.append(topic_mixture)
+            checkout['topics'] = book['topics']
             checkouts.append(checkout)
 
     color = ColorHash(id)

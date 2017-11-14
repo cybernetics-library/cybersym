@@ -18,21 +18,58 @@ function genMat(topic) {
   return mat;
 }
 
-function genObject(topic) {
-  // generate random object for topic
-  var height = 2,
-      mat = genMat(topic),
-      geo = new THREE.CylinderGeometry(util.rand(1,4)/4, util.rand(1,4)/4, height, 8);
-  geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, height/2, 0 ) ); // set pivot to origin
-  var obj = new THREE.Mesh(geo, mat);
-  for (var i=0; i<util.randInt(1, 5); i++) {
-    var nextHeight = util.rand(1,4)/4;
-    var geo = new THREE.CylinderGeometry(util.rand(1,4)/4, util.rand(1,4)/4, nextHeight, 8);
-    var mesh = new THREE.Mesh(geo, mat);
-    obj.add(mesh);
-    height += nextHeight;
-  }
-  obj.rotation.set(util.rand(-3, 3), util.rand(-3, 3), util.rand(-3,3));
+const TOPIC_MATS = Object.keys(config.COLORS).reduce((agg, k) => {
+  agg[k] = genMat(k);
+  return agg;
+}, {});
+
+
+function sortTopics(topics, book_id) {
+  // turn to array
+  var topics = Object.keys(topics).map(t => [
+    t, topics[t],
+    parseInt(md5(`${t}${book_id}`).substring(0, 12), 16)
+  ]);
+
+  topics.sort((a, b) => {
+    return a[2] - b[2];
+  });
+  return topics
+}
+
+function valFromHash(hash, lo, hi) {
+  return (hash%(hi-lo+1))+lo;
+}
+
+function genObject(checkout) {
+  // generate object for topic
+  var topics = sortTopics(checkout['topics'], checkout['book_id']);
+  var minHeight = 1.2/(topics.length+1),
+      baseHeight = 2.2/(topics.length+1),
+      height = 0, obj;
+  topics.map(topic => {
+    var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 2, 3);
+    for (var i=0; i<nPieces; i++) {
+      var nextHeight = valFromHash(topic[2], minHeight, baseHeight);
+      var geo = new THREE.CylinderGeometry(
+          Math.sqrt(valFromHash(topic[2] * (i+1), 1, 3))/2,
+          Math.sqrt(valFromHash(Math.sqrt(topic[2] * (i+1)), 1, 3))/2,
+          nextHeight, 8);
+      var mesh = new THREE.Mesh(geo, TOPIC_MATS[topic[0]]);
+      if (!obj) {
+        geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, nextHeight/2, 0 ) ); // set pivot to origin
+        obj = new THREE.Mesh(geo, TOPIC_MATS[topic[0]]);
+      } else {
+        obj.add(mesh);
+      }
+      mesh.position.y = height/2;
+      height += nextHeight;
+    }
+  });
+  obj.rotation.set(
+    valFromHash(topics[0][2], -3, 3),
+    valFromHash(topics[0][2], -3, 3),
+    valFromHash(topics[0][2], -3, 3));
   return obj;
 }
 
@@ -66,12 +103,10 @@ class Planet {
 
   // compute object placement for checkout
   nextEvent(checkout, animate) {
+    console.log(checkout);
     this.lastHash = md5(this.lastHash + checkout['book_id']);
     var coords = util.hashToPoint(this.lastHash); // where the object spawns
-
-    // TODO get this from checkout/book
-    var topic = util.choice(['biology', 'architecture', 'society', 'technology', 'economy']);
-    var obj = genObject(topic);
+    var obj = genObject(checkout);
 
     // add as child to planet so it follows rotation
     this.planet.add(obj);
@@ -151,7 +186,7 @@ space.start(function() {
 
   // poll for changes
   var elapsed = Date.now() - lastTime;
-  if (elapsed > 5000) {
+  if (elapsed > 2000) {
     checkForUpdates();
     lastTime = Date.now();
   }
