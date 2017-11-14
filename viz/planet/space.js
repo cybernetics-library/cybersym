@@ -34,7 +34,14 @@ class Space {
 
     // on resize
     window.addEventListener('resize', function() {
-      camera.aspect = window.innerWidth / window.innerHeight;
+      aspect = window.innerWidth / window.innerHeight;
+      // for perspective cameras
+      // camera.aspect = aspect;
+      // for orthographic cameras
+      camera.left = -D*aspect;
+      camera.right = D*aspect;
+      camera.top = D;
+      camera.bottom = -D;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }, false);
