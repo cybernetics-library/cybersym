@@ -7,13 +7,11 @@ import Space from './space';
 import createMonument from '../monument';
 
 
-
 class Planet {
   constructor(space, attendee_id) {
     this.space = space;
     this.attendee_id = attendee_id;
     this.lastHash = md5(attendee_id);
-    document.getElementById('planet-name').innerHTML = `Planet ${attendee_id}`;
 
     // this.objs = {};
     // this.names = {};
@@ -31,6 +29,8 @@ class Planet {
       this.planet = mesh;
       this.lastCheckout = data.checkouts.pop();
       data.checkouts.map(c => this.nextEvent(c, false));
+
+      document.getElementById('planet-name').innerHTML = data.name;
       this.nextEvent(this.lastCheckout, true); // animate the last checkout
     });
   }
@@ -87,7 +87,6 @@ class Planet {
 }
 
 
-var attendee_id = 'test';
 var space = new Space();
 var planet, lastCheckout;
 var lastTime = Date.now();
@@ -100,7 +99,7 @@ function checkForUpdates() {
       if (planet) {
         space.scene.remove(planet.planet);
       }
-      planet = new Planet(space, attendee_id);
+      planet = new Planet(space, lastCheckout.attendee_id);
       console.log('new planet!');
     } else if (planet.lastCheckout.book_id != lastCheckout.book_id) {
       // smash it into the planet!!!

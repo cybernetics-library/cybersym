@@ -8,6 +8,7 @@ from flask_cors import CORS
 from .params import MONUMENT_NAMES
 from colorhash import ColorHash
 from collections import defaultdict
+from .planets import name_from_id
 
 app = Flask(__name__)
 CORS(app)
@@ -93,7 +94,12 @@ def planet(id):
 
     color = ColorHash(id)
     topic_mixture = mix_topics(*topic_mixtures)
-    return jsonify(color=color.hex, checkouts=checkouts, topic_mixture=topic_mixture)
+    return jsonify(
+        color=color.hex,
+        checkouts=checkouts,
+        topic_mixture=topic_mixture,
+        name=name_from_id(id)
+    )
 
 
 @app.route('/planets')
