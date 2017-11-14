@@ -8,6 +8,7 @@ from flask_cors import CORS
 from .params import MONUMENT_NAMES
 from colorhash import ColorHash
 from collections import defaultdict
+from .planets import name_from_id
 
 app = Flask(__name__)
 CORS(app)
@@ -66,7 +67,14 @@ def checkout(id):
 @app.route('/checkouts/<id>')
 def checkouts(id):
     """checkouts for a station id"""
-    checkouts = [c for c in db['checkouts'].all() if c['station_id'] == id]
+    checkouts = []
+    for c in db['checkouts'].all():
+        if c['station_id'] == id:
+            book_id = c['book_id']
+            book = LIBRARY['books'][book_id]
+            c['topics'] = book['topics']
+            c['title'] = book['title']
+            checkouts.append(c)
     return jsonify(checkouts=checkouts)
 
 
@@ -82,11 +90,18 @@ def planet(id):
             book = LIBRARY['books'][book_id]
             topic_mixture = book['topics']
             topic_mixtures.append(topic_mixture)
+            checkout['topics'] = book['topics']
+            checkout['title'] = book['title']
             checkouts.append(checkout)
 
     color = ColorHash(id)
     topic_mixture = mix_topics(*topic_mixtures)
-    return jsonify(color=color.hex, checkouts=checkouts, topic_mixture=topic_mixture)
+    return jsonify(
+        color=color.hex,
+        checkouts=checkouts,
+        topic_mixture=topic_mixture,
+        name=name_from_id(id)
+    )
 
 
 @app.route('/planets')
@@ -114,7 +129,7 @@ def books():
 def question():
     """returns a question based on what has been checked out"""
     questions = []
-    for id in set(db['checkouts'].all()):
+    for id in set([c['book_id'] for c in db['checkouts'].all()]):
         questions.extend(get_questions(id))
     questions = list(set(questions))
     if questions:

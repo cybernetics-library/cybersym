@@ -41,9 +41,12 @@ app.get('/monuments', function(req, res){
     res.sendFile(__dirname + '/monuments/index.html');
 });
 
-
 app.get('/planet', function(req, res){
     res.sendFile(__dirname + '/planet/index.html');
+});
+
+app.get('/galaxy', function(req, res){
+    res.sendFile(__dirname + '/galaxy/index.html');
 });
 
 
