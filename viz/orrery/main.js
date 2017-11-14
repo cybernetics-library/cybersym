@@ -49,6 +49,8 @@ class Orrery {
   }
 
   populate() {
+
+	///// systems
     this.systems = [];
     var birds = new System(20, [8,16],
       new THREE.ConeGeometry(0.01, 0.23, 4),
@@ -59,17 +61,36 @@ class Orrery {
         y: (Math.random() - 1)/200
       }
     });
-    this.scene.add(birds.boidGroup);
     this.systems.push(birds);
     this.systems.forEach(s => s.beings.forEach(b => this.scene.add(b.group)));
+
     window.birds = birds;
     window.THREE = THREE;
+
+///// planets
+    this.planetGroup = new THREE.Group();
+    this.planetGroup.name = "planetGroup";
+
+		this.planets = [];
+    for (var i=0; i<10; i++) {
+      var planet = new Boid({ pos: Boid.randomPos(),
+                            vel: Boid.randomVel(),
+                            rot: Boid.randomRot(),
+                            attr: { color: 0x12FF33,
+                                    name: "Boid-" + i } });
+      this.planets.push(planet);
+    }
+		this.planets.forEach(p => p.addToScene(this.planetGroup));
+		this.scene.add(this.planetGroup);
+
+
   }
 
   render() {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
 		this.systems.forEach(s => s.update());
+    this.planets.forEach(b => b.update(this.planets));
   }
 
   _setupScene() {
@@ -125,7 +146,7 @@ class Orrery {
       var raycaster = new THREE.Raycaster();
           raycaster.setFromCamera(mouse, this.camera);
 
-      var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "boidGroup" , true).children, true);
+      var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "planetGroup" , true).children, true);
       if (intersects.length > 0) {
         var obj = intersects[0].object;
         this.tooltip.innerHTML = obj.name;

@@ -41,24 +41,11 @@ function generateTexture(c1, c2) {
 
 class System {
   constructor(n, herdSizes, geo, color, altitude) {
-    this.boids = [];
     this.beings = [];
-
-    this.boidGroup = new THREE.Group();
-    this.boidGroup.name = "boidGroup";
-
 
     for (var i=0; i<n; i++) {
       var being = new Being(uniform(herdSizes), geo, color, altitude);
       this.beings.push(being);
-
-      var boid = new Boid({ pos: Boid.randomPos(),
-                            vel: Boid.randomVel(),
-                            rot: Boid.randomRot(),
-                            attr: { color: color,
-                                    name: "Boid-" + i } });
-      this.boids.push(boid);
-      this.boidGroup.add(boid.mesh);
     }
 
 
@@ -69,7 +56,6 @@ class System {
   }
 
   update() {
-    this.boids.forEach(b => b.update(this.boids));
     this.beings.forEach(b => b.update());
   }
 }
