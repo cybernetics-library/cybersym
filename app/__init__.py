@@ -64,17 +64,16 @@ def checkout(id):
     return jsonify(**book)
 
 
-@app.route('/checkouts/<id>')
-def checkouts(id):
-    """checkouts for a station id"""
+@app.route('/checkouts')
+def checkouts():
+    """return all checkouts"""
     checkouts = []
     for c in db['checkouts'].all():
-        if c['station_id'] == id:
-            book_id = c['book_id']
-            book = LIBRARY['books'][book_id]
-            c['topics'] = book['topics']
-            c['title'] = book['title']
-            checkouts.append(c)
+        book_id = c['book_id']
+        book = LIBRARY['books'][book_id]
+        c['topics'] = book['topics']
+        c['title'] = book['title']
+        checkouts.append(c)
     return jsonify(checkouts=checkouts)
 
 

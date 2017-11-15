@@ -93,7 +93,7 @@ var space = new Space();
 var planet, lastCheckout;
 var lastTime = Date.now();
 function checkForUpdates() {
-  util.request(`${config.API_URL}/checkouts/${config.HOSTNAME}`, (data) => {
+  util.request(`${config.API_URL}/checkouts/`, (data) => {
     var checkouts = data.checkouts;
     var lastCheckout = checkouts.pop();
     if (planet === undefined || planet.attendee_id !== lastCheckout.attendee_id) {
