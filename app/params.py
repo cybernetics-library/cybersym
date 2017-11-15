@@ -56,23 +56,22 @@ MONUMENT_NAMES = {
     'viableutopias': 'Monument to Viable Utopias'
 }
 
-"""
-all topics: 
-architecture
-art
-business
-biology
-cognition
-computation
-design
-economics
-humanities
-media
-politics
-society
-systems
-science
-"""
+TOPICS = [
+    'architecture',
+    'art',
+    'business',
+    'biology',
+    'cognition',
+    'computation',
+    'design',
+    'economics',
+    'humanities',
+    'media',
+    'politics',
+    'society',
+    'systems',
+    'science'
+]
 
 MONUMENT_TOPICS = {
     'peacebalance': {
