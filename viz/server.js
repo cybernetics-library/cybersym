@@ -33,6 +33,10 @@ app.get('/earth', function(req, res){
     res.sendFile(__dirname + '/earth/index.html');
 });
 
+app.get('/orrery', function(req, res){
+    res.sendFile(__dirname + '/orrery/index.html');
+});
+
 app.get('/predator_prey', function(req, res){
     res.sendFile(__dirname + '/predator_prey/index.html');
 });

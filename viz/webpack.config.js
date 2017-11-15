@@ -8,6 +8,7 @@ module.exports = {
   // Include the hot middleware with each entry point
   entry: {
 		earth_bundle: ['./earth/main.js', hotMiddlewareScript],
+		orrery_bundle: ['./orrery/main.js', hotMiddlewareScript],
 		predator_prey_bundle: ['./predator_prey/main.js', hotMiddlewareScript],
 		monuments_bundle: ['./monuments/main.js', hotMiddlewareScript],
 		planet_bundle: ['./planet/main.js', hotMiddlewareScript],
