@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>☼!YOUR PLANET!☼</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Muli');
+        html, body {
+            padding: 0;
+            margin: 0;
+            background: #b2e1ff;
+            font-family: 'Muli';
+            overflow: hidden;
+        }
+        .tooltip {
+            background: #222;
+            color: #fff;
+            border-radius: 0.2em;
+            text-align: center;
+            padding: 0.1em 0.5em;
+            line-height: 1.4;
+            position: fixed;
+        }
+        .tooltip-wrapper {
+            text-align: center;
+            position: fixed;
+            left: 0;
+            bottom: 1em;
+            right: 0;
+        }
+        .title-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="tooltip-wrapper">
+        <div id="planet-name" class="tooltip title-tooltip"></div>
+    </div>
+    <script src="planet_bundle.js"></script>
+</body>
+</html>

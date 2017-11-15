@@ -6,12 +6,15 @@ from .pp import compute_pp_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from .params import MONUMENT_NAMES
+from colorhash import ColorHash
+from collections import defaultdict
+from .planets import name_from_id
 
 app = Flask(__name__)
 CORS(app)
 db = {
     table: DB(table)
-    for table in ['checkouts', 'monuments', 'pp']
+    for table in ['checkouts']
 }
 LIBRARY = json.load(open('data/library.json', 'r'))
 
@@ -30,24 +33,90 @@ def get_questions(id):
     return questions
 
 
+def sum_dicts(*dicts):
+    sum = defaultdict(int)
+    for d in dicts:
+        for k, v in d.items():
+            sum[k] += v
+    return sum
+
+
+def mix_topics(*topic_mixtures):
+    """compute aggregate topic mixture"""
+    topic_mixture = sum_dicts(*topic_mixtures)
+    total = sum(topic_mixture.values())
+    return {t: v/total for t, v in topic_mixture.items()}
+
+
 @app.route('/checkout/<id>', methods=['POST'])
 def checkout(id):
-    """accepts a book id,
-    loads its topic mixtures
-    and computes a new monuments state"""
+    """records a checkout for a attendee and station"""
     # save new book ids
-    db['checkouts'].append(id)
-
-    # load all book ids and their topic mixtures
-    topic_mixtures = [LIBRARY['books'][id]['topics'] for id in db['checkouts'].all()]
-
-    # compute new monuments state and save to db
-    monuments_state = compute_monuments_state(topic_mixtures)
-    db['monuments'].append(monuments_state)
+    data = request.get_json()
+    db['checkouts'].append({
+        'book_id': id,
+        'attendee_id': data['attendee_id'],
+        'station_id': data['station_id']
+    })
 
     # return book info
     book = LIBRARY['books'][id]
     return jsonify(**book)
+
+
+@app.route('/checkouts/<id>')
+def checkouts(id):
+    """checkouts for a station id"""
+    checkouts = []
+    for c in db['checkouts'].all():
+        if c['station_id'] == id:
+            book_id = c['book_id']
+            book = LIBRARY['books'][book_id]
+            c['topics'] = book['topics']
+            c['title'] = book['title']
+            checkouts.append(c)
+    return jsonify(checkouts=checkouts)
+
+
+@app.route('/planets/<id>')
+def planet(id):
+    """returns attendee checkout planet info"""
+    # get topic mixtures for books attendee has checked out
+    checkouts = []
+    topic_mixtures = []
+    for checkout in db['checkouts'].all():
+        if checkout['attendee_id'] == id:
+            book_id = checkout['book_id']
+            book = LIBRARY['books'][book_id]
+            topic_mixture = book['topics']
+            topic_mixtures.append(topic_mixture)
+            checkout['topics'] = book['topics']
+            checkout['title'] = book['title']
+            checkouts.append(checkout)
+
+    color = ColorHash(id)
+    topic_mixture = mix_topics(*topic_mixtures)
+    return jsonify(
+        color=color.hex,
+        checkouts=checkouts,
+        topic_mixture=topic_mixture,
+        name=name_from_id(id)
+    )
+
+
+@app.route('/planets')
+def planets():
+    """returns checkout planet info for all attendees"""
+    planets = defaultdict(lambda: {'topic_mixture': []})
+    for checkout in db['checkouts'].all():
+        book_id = checkout['book_id']
+        topic_mixture = LIBRARY['books'][book_id]['topics']
+        planets[checkout['attendee_id']]['topic_mixture'].append(topic_mixture)
+
+    for id, d in planets.items():
+        d['topic_mixture'] = mix_topics(*d['topic_mixture'])
+        d['color'] = ColorHash(id).hex
+    return jsonify(**planets)
 
 
 @app.route('/books')
@@ -60,13 +129,19 @@ def books():
 def question():
     """returns a question based on what has been checked out"""
     questions = []
-    for id in set(db['checkouts'].all()):
-        questions.extend(get_questions(id))
-    questions = list(set(questions))
+    for id in set([c['book_id'] for c in db['checkouts'].all()]):
+        book = LIBRARY['books'][id]
+        qs = get_questions(id)
+        questions.extend([{
+            'title': book['title'],
+            'topics': book['topics'],
+            'book_id': id,
+            'question': q
+        } for q in qs])
     if questions:
         question = random.choice(questions)
     else:
-        question = 'Hmm...'
+        question = {'question': 'Hmm...', 'title': None}
     return jsonify(question=question)
 
 
