@@ -5,7 +5,7 @@ from .monuments import compute_monuments_state
 from .pp import compute_pp_state
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from .params import MONUMENT_NAMES
+from .params import MONUMENT_NAMES, TOPICS
 from colorhash import ColorHash
 from collections import defaultdict
 from .planets import name_from_id
@@ -17,6 +17,11 @@ db = {
     for table in ['checkouts']
 }
 LIBRARY = json.load(open('data/library.json', 'r'))
+
+# add missing topics as 0
+for id, book in LIBRARY['books'].items():
+    for t in TOPICS:
+        book['topics'][t] = book['topics'].get(t, 0)
 
 
 def get_questions(id):
@@ -64,17 +69,16 @@ def checkout(id):
     return jsonify(**book)
 
 
-@app.route('/checkouts/<id>')
-def checkouts(id):
-    """checkouts for a station id"""
+@app.route('/checkouts')
+def checkouts():
+    """return all checkouts"""
     checkouts = []
     for c in db['checkouts'].all():
-        if c['station_id'] == id:
-            book_id = c['book_id']
-            book = LIBRARY['books'][book_id]
-            c['topics'] = book['topics']
-            c['title'] = book['title']
-            checkouts.append(c)
+        book_id = c['book_id']
+        book = LIBRARY['books'][book_id]
+        c['topics'] = book['topics']
+        c['title'] = book['title']
+        checkouts.append(c)
     return jsonify(checkouts=checkouts)
 
 

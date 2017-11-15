@@ -41,7 +41,10 @@ const TOPIC_MATS = Object.keys(COLORS).reduce((agg, k) => {
 
 function sortTopics(topics, book_id) {
   // turn to array
-  var topics = Object.keys(topics).map(t => [
+  // and filter out topics that map to 0
+  var topics = Object.keys(topics).filter(t => {
+    return topics[t] != 0;
+  }).map(t => [
     t, topics[t],
     parseInt(md5(`${t}${book_id}`).substring(0, 12), 16)
   ]);
@@ -63,13 +66,15 @@ function createMonument(checkout) {
       baseHeight = 2.2/(topics.length+1),
       height = 0, obj;
   topics.map(topic => {
-    var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 2, 3);
+    var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 3, 4);
     for (var i=0; i<nPieces; i++) {
       var nextHeight = valFromHash(topic[2], minHeight, baseHeight);
-      var geo = new THREE.CylinderGeometry(
-          Math.sqrt(valFromHash(topic[2] * (i+1), 1, 3))/2,
-          Math.sqrt(valFromHash(Math.sqrt(topic[2] * (i+1)), 1, 3))/2,
-          nextHeight, 8);
+      var odd = topic[2] % 2,
+          a = Math.sqrt(valFromHash(Math.pow(topic[2], 2) * (i+1), 1, 5))/2,
+          b = Math.sqrt(valFromHash(Math.sqrt(topic[2] * (i+1)), 1, 5))/2;
+      var first = odd === 0 ? a : b,
+          second = odd === 0 ? b : a;
+      var geo = new THREE.CylinderGeometry(first, second, nextHeight, 8);
       var mesh = new THREE.Mesh(geo, TOPIC_MATS[topic[0]]);
       if (!obj) {
         geo.applyMatrix( new THREE.Matrix4().makeTranslation( 0, nextHeight/2, 0 ) ); // set pivot to origin
