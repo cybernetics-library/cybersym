@@ -130,12 +130,18 @@ def question():
     """returns a question based on what has been checked out"""
     questions = []
     for id in set([c['book_id'] for c in db['checkouts'].all()]):
-        questions.extend(get_questions(id))
-    questions = list(set(questions))
+        book = LIBRARY['books'][id]
+        qs = get_questions(id)
+        questions.extend([{
+            'title': book['title'],
+            'topics': book['topics'],
+            'book_id': id,
+            'question': q
+        } for q in qs])
     if questions:
         question = random.choice(questions)
     else:
-        question = 'Hmm...'
+        question = {'question': 'Hmm...', 'title': None}
     return jsonify(question=question)
 
 

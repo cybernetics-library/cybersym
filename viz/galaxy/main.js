@@ -1,6 +1,9 @@
 import * as THREE from 'three';
+import createMonument from '../monument';
 
 var timer = new Timer();
+var pivot = new THREE.Group();
+var obj;
 
 function Timer(callback, delay) {
   var timerId, start, remaining = delay;
@@ -19,7 +22,17 @@ function Timer(callback, delay) {
 }
 
 function ask(question) {
-  document.getElementById('question').innerHTML = question;
+  if (obj) {
+    pivot.remove(obj);
+  }
+  obj = createMonument(question);
+  obj.scale.set(3,3,3);
+  var box = new THREE.Box3().setFromObject(obj);
+  box.center(obj.position); // this re-sets the mesh position
+  obj.position.multiplyScalar(-1);
+  pivot.add(obj);
+  document.getElementById('question').innerHTML = question.question;
+  document.getElementById('title').innerHTML = question.title;
   document.getElementById('bubble').style.display = 'block';
 }
 
@@ -95,6 +108,9 @@ class Space {
 
   start() {
     requestAnimationFrame(this.start.bind(this));
+    if (obj) {
+      pivot.rotation.y += 0.008;
+    }
     this.renderer.render(this.scene, this.camera);
   }
 }
@@ -114,4 +130,5 @@ document.addEventListener('keydown', function(ev) {
 
 wonder();
 var space = new Space();
+space.scene.add(pivot);
 space.start();

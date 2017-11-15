@@ -12,6 +12,27 @@
             overflow: hidden;
         }
 
+        .tooltip {
+            background: #222;
+            color: #fff;
+            border-radius: 0.2em;
+            text-align: center;
+            padding: 0.1em 0.5em;
+            line-height: 1.4;
+            position: fixed;
+        }
+        .tooltip-wrapper {
+            text-align: center;
+            position: fixed;
+            left: 0;
+            bottom: 1em;
+            right: 0;
+        }
+        .title-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
         #bubble {
           margin: 2em;
           position: fixed;
@@ -23,7 +44,7 @@
           animation: bounceIn 0.5s;
           right: 1em;
           width: 30%;
-          top: 10%;
+          top: 40vh;
           display: none;
         }
 
@@ -89,6 +110,9 @@
 <div id="stars">
 <div id="bubble" class="tri-right left-in"><div id="question">Hello World!</div></div>
 <canvas id="earth"></canvas>
+<div class="tooltip-wrapper">
+    <div id="title" class="tooltip title-tooltip"></div>
+</div>
 <script src="galaxy_bundle.js"></script>
 </body>
 </html>
