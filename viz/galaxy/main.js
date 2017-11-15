@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import createMonument from '../monument';
 
+// const API_URL = 'http://localhost:5000';
+const API_URL = 'http://library.cybernetics.social';
 var timer = new Timer();
 var pivot = new THREE.Group();
 var obj;
@@ -38,7 +40,7 @@ function ask(question) {
 
 function wonder() {
   timer = new Timer(wonder, 60*1000);
-  fetch('http://localhost:5000/question').then(resp => {
+  fetch(`${API_URL}/question`).then(resp => {
     return resp.json();
   }).then(json => {
     ask(json.question);
