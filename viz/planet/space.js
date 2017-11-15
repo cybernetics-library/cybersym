@@ -60,8 +60,8 @@ class Space {
       var raycaster = new THREE.Raycaster();
           raycaster.setFromCamera(mouse, this.camera);
 
-      var intersects = raycaster.intersectObjects(Object.values(this.planet.objs));
-      if (intersects.length > 0) {
+      var intersects = raycaster.intersectObjects(Object.values(this.planet.objs).concat([this.planet.planet]));
+      if (intersects.length > 0 && intersects[0].object !== this.planet.planet) {
         var obj = intersects[0].object;
         this.tooltip.innerHTML = this.planet.names[obj.uuid];
         this.tooltip.style.left = `${ev.clientX + 20}px`;
