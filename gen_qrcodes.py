@@ -15,7 +15,7 @@ def gen_qr_code(rawid):
 if __name__ == '__main__':
     f = open('qrcode_output.csv', 'w')
     f.write("planet_name,qrid\n")
-    N_ATTENDEES = 310
+    N_ATTENDEES = 350
     for i in range(N_ATTENDEES):
         id = uuid4().hex
         gen_qr_code(id)
