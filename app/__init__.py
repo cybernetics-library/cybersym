@@ -61,7 +61,8 @@ def checkout(id):
     db['checkouts'].append({
         'book_id': id,
         'attendee_id': data['attendee_id'],
-        'station_id': data['station_id']
+        'station_id': data['station_id'],
+        'timestamp': data['timestamp']
     })
 
     # return book info
