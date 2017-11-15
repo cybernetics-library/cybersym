@@ -66,7 +66,7 @@ function createMonument(checkout) {
       baseHeight = 2.2/(topics.length+1),
       height = 0, obj;
   topics.map(topic => {
-    var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 2, 3);
+    var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 3, 4);
     for (var i=0; i<nPieces; i++) {
       var nextHeight = valFromHash(topic[2], minHeight, baseHeight);
       var odd = topic[2] % 2,
