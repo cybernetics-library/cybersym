@@ -4,17 +4,19 @@ import * as THREE from 'three';
 // and https://github.com/OwenMcNaughton/Planets.js/blob/master/js/Planet.js
 
 var planetFactors = {};
-planetFactors.sepFac = 0.02; 
+planetFactors.sepFac = 0.32; 
 planetFactors.cohFac = 0.03;
 planetFactors.aliFac = 0.00;
 planetFactors.tarFac = 0.31;
-planetFactors.gravFac = 2.2;
+planetFactors.gravFac = 0.5;
 planetFactors.maxSpeed = 0.005;
 planetFactors.maxForce = 0.001;
 planetFactors.cohDist = 0.2;
 planetFactors.sepDist = 0.2;
 planetFactors.aliDist = 0.1;
 planetFactors.boundFac = 0.1;
+planetFactors.swirlFac = 0.1;
+planetFactors.sunPullFac = 0.1;
 planetFactors.maxDistFromCenter = 3;
 
 window.planetFactors = planetFactors;
@@ -276,37 +278,75 @@ class Planet {
     return sum;
    }
 
+	swirl() {
+
+		var steer = new THREE.Vector3();
+		steer.copy( this.pos );
+		var up = new THREE.Vector3(0,1,0);
+		steer.applyAxisAngle ( up , Math.PI / 2 )
+
+		steer.setLength(1)
+		steer.setLength(this.mass / 1000)
+
+		return steer;
+  }
+
+	pullTowardsSun() {
+		var steer = new THREE.Vector3();
+		steer.copy( this.pos );
+		steer.negate();
+		steer.setLength(this.mass / 1000)
+
+		return steer;
+  }
+
 
 
   moveUpdate(planets) {
   
-    var sep = this.separation(planets);
-    var ali = this.alignment(planets);
-    var coh = this.cohesion(planets);
-    var grav = this.gravity(planets)
-    var boundF = this.boundSphere();
 
     this.acc = new THREE.Vector3(0,0,0);
     
+    var sep = this.separation(planets);
     if(!(typeof sep === 'undefined')) {
       sep.multiplyScalar(planetFactors.sepFac);
       this.acc.add(sep);
     }
+
+    var ali = this.alignment(planets);
     if(!(typeof ali === 'undefined')) {
       ali.multiplyScalar(planetFactors.aliFac);
       this.acc.add(ali);
     }
+
+    var coh = this.cohesion(planets);
     if(!(typeof coh === 'undefined')) {
       coh.multiplyScalar(planetFactors.cohFac);
       this.acc.add(coh);
     }
+
+    var grav = this.gravity(planets)
     if(!(typeof grav === 'undefined')) {
       grav.multiplyScalar(planetFactors.gravFac);
       this.acc.add(grav);
     }
+
+    var boundF = this.boundSphere();
     if(!(typeof boundF === 'undefined')) {
       boundF.multiplyScalar(planetFactors.boundFac);
       this.acc.add(boundF);
+    }
+
+    var swirlF = this.swirl();
+    if(!(typeof swirlF === 'undefined')) {
+      swirlF.multiplyScalar(planetFactors.swirlFac);
+      this.acc.add(swirlF);
+    }
+
+    var sunPullF = this.pullTowardsSun();
+    if(!(typeof sunPullF === 'undefined')) {
+      sunPullF.multiplyScalar(planetFactors.sunPullFac);
+      this.acc.add(sunPullF);
     }
 
     //var tar = new THREE.Vector3(0, 1, 0);

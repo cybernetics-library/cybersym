@@ -43,9 +43,13 @@ class Orrery {
     this._setupScene();
     this._setupLights();
 
-    var geometry = new THREE.SphereGeometry(1, 32, 32);
+    var geometry = new THREE.SphereGeometry(6, 32, 32);
     // var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
 		var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading, wireframe: true});
+    var group = new THREE.Group();
+
+    this.scene.add(group)
+    this.orrery = group;
 
     this.populate();
 
@@ -55,6 +59,32 @@ class Orrery {
   }
 
   populate() {
+////// stars
+
+
+	var distance = 100;
+	var geometry = new THREE.Geometry();
+
+	for (var i = 0; i < 10000; i++) {
+
+		var vertex = new THREE.Vector3();
+
+		var theta = THREE.Math.randFloatSpread(360);
+		var phi = THREE.Math.randFloatSpread(360);
+
+		vertex.x = distance * Math.sin(theta) * Math.cos(phi);
+		vertex.y = distance * Math.sin(theta) * Math.sin(phi);
+		vertex.z = distance * Math.cos(theta);
+
+		geometry.vertices.push(vertex);
+	}
+	var particles = new THREE.PointCloud(geometry, new THREE.PointCloudMaterial({
+		color: 0xffffff,
+		size: 0.5
+	}));
+	particles.boundingSphere = 5;
+	this.orrery.add(particles);
+
 
 	///// systems
     this.systems = [];
@@ -68,7 +98,7 @@ class Orrery {
       }
     });
     this.systems.push(birds);
-    this.systems.forEach(s => s.beings.forEach(b => this.scene.add(b.group)));
+    this.systems.forEach(s => s.beings.forEach(b => this.orrery.add(b.group)));
 
     window.birds = birds;
     window.THREE = THREE;
@@ -110,7 +140,7 @@ class Orrery {
     this.planets.push(planet);
 
     this.planets.forEach(p => p.addToScene(this.planetGroup));
-		this.scene.add(this.planetGroup);
+		this.orrery.add(this.planetGroup);
 
     window.planets = this.planets;
 
@@ -119,6 +149,7 @@ class Orrery {
   render() {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
+//    this.orrery.rotation.y += 0.001;
 		this.systems.forEach(s => s.update());
     this.planets.forEach(b => b.update(this.planets));
   }
