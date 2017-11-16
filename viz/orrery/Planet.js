@@ -4,16 +4,18 @@ import * as THREE from 'three';
 // and https://github.com/OwenMcNaughton/Planets.js/blob/master/js/Planet.js
 
 var planetFactors = {};
-planetFactors.sepFac = 0.12; 
+planetFactors.sepFac = 0.02; 
 planetFactors.cohFac = 0.03;
-planetFactors.aliFac = 0.01;
+planetFactors.aliFac = 0.00;
 planetFactors.tarFac = 0.31;
-planetFactors.gravFac = 1.2;
-planetFactors.maxSpeed = 0.015;
+planetFactors.gravFac = 2.2;
+planetFactors.maxSpeed = 0.005;
 planetFactors.maxForce = 0.001;
 planetFactors.cohDist = 0.2;
 planetFactors.sepDist = 0.2;
 planetFactors.aliDist = 0.1;
+planetFactors.boundFac = 0.1;
+planetFactors.maxDistFromCenter = 3;
 
 window.planetFactors = planetFactors;
 
@@ -184,6 +186,24 @@ class Planet {
     return steer;
   }
 
+
+	boundSphere() {
+
+    var origin = new THREE.Vector3(0,0,0);
+    var dist = this.pos.distanceTo(origin);
+
+    if(dist > planetFactors.maxDistFromCenter) {
+      var steer = new THREE.Vector3();
+      steer.copy( this.pos );
+      steer.sub( origin );
+      steer.setLength(0.1 / Math.pow((dist - planetFactors.maxDistFromCenter), 2));
+      steer.negate();
+      return steer;
+    }
+  }
+  
+  
+
   wrapBounds() {
     if ( this.pos.x >   bound_width ) this.pos.x = - bound_width;
     if ( this.pos.x < - bound_width ) this.pos.x =   bound_width;
@@ -263,19 +283,19 @@ class Planet {
     var sep = this.separation(planets);
     var ali = this.alignment(planets);
     var coh = this.cohesion(planets);
-
     var grav = this.gravity(planets)
+    var boundF = this.boundSphere();
 
     this.acc = new THREE.Vector3(0,0,0);
     
-    //if(!(typeof sep === 'undefined')) {
-      //sep.multiplyScalar(planetFactors.sepFac);
-      //this.acc.add(sep);
-    //}
-    //if(!(typeof ali === 'undefined')) {
-      //ali.multiplyScalar(planetFactors.aliFac);
-      //this.acc.add(ali);
-    //}
+    if(!(typeof sep === 'undefined')) {
+      sep.multiplyScalar(planetFactors.sepFac);
+      this.acc.add(sep);
+    }
+    if(!(typeof ali === 'undefined')) {
+      ali.multiplyScalar(planetFactors.aliFac);
+      this.acc.add(ali);
+    }
     if(!(typeof coh === 'undefined')) {
       coh.multiplyScalar(planetFactors.cohFac);
       this.acc.add(coh);
@@ -283,6 +303,10 @@ class Planet {
     if(!(typeof grav === 'undefined')) {
       grav.multiplyScalar(planetFactors.gravFac);
       this.acc.add(grav);
+    }
+    if(!(typeof boundF === 'undefined')) {
+      boundF.multiplyScalar(planetFactors.boundFac);
+      this.acc.add(boundF);
     }
 
     //var tar = new THREE.Vector3(0, 1, 0);
@@ -294,7 +318,7 @@ class Planet {
 
       
     this.vel.add(this.acc);
-    //this.vel.clampLength(0, planetFactors.maxSpeed);
+    this.vel.clampLength(0, planetFactors.maxSpeed);
 
     this.pos.add(this.vel);
 
