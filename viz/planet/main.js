@@ -37,7 +37,6 @@ class Planet {
 
   // compute object placement for checkout
   nextEvent(checkout, animate) {
-    console.log(checkout);
     this.lastHash = md5(this.lastHash + checkout['book_id']);
     var coords = util.hashToPoint(this.lastHash); // where the object spawns
     var obj = createMonument(checkout);
@@ -94,8 +93,19 @@ var planet, lastCheckout;
 var lastTime = Date.now();
 function checkForUpdates() {
   util.request(`${config.API_URL}/checkouts`, (data) => {
-    var checkouts = data.checkouts;
-    var lastCheckout = checkouts.pop();
+    if (lastCheckout === undefined) {
+      lastCheckout = data.checkouts[data.checkouts.length - 1];
+    }
+    var toProcess = data.checkouts.filter(c => {
+      return !planet || (c['timestamp'] > lastCheckout.timestamp);
+    });
+    if (toProcess.length === 0) {
+      console.log('nothing new...');
+      return;
+    }
+
+    // check who's planet we should be displaying
+    lastCheckout = toProcess[toProcess.length - 1];
     if (planet === undefined || planet.attendee_id !== lastCheckout.attendee_id) {
       // destroy previous planet if there is one
       if (planet) {
@@ -104,14 +114,17 @@ function checkForUpdates() {
       planet = new Planet(space, lastCheckout.attendee_id);
       space.planet = planet;
       console.log('new planet!');
-    } else if (planet.lastCheckout.book_id != lastCheckout.book_id) {
-      // smash it into the planet!!!
-      planet.nextEvent(lastCheckout, true);
-      planet.lastCheckout = lastCheckout;
-      console.log('smash!!!');
-    } else {
-      console.log('nothing new...');
     }
+
+    // filter down to events for that planet
+    toProcess.filter(c => {
+      return c.attendee_id == lastCheckout.attendee_id;
+    }).map(c => {
+      // smash it into the planet!!!
+      planet.nextEvent(c, true);
+      console.log('smash!!!');
+    });
+    planet.lastCheckout = lastCheckout;
   });
 }
 checkForUpdates();

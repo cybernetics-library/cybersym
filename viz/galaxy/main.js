@@ -95,7 +95,6 @@ class Space {
   initScene() {
     // setup scene
     var scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0xCCCCFF, 0.03);
 
     // setup lighting
     var ambient = new THREE.HemisphereLight(0xffffff, 0x000000, 1);

@@ -65,6 +65,12 @@ function createMonument(checkout) {
   var minHeight = 1.2/(topics.length+1),
       baseHeight = 2.2/(topics.length+1),
       height = 0, obj;
+
+  // hack default
+  if (topics.length === 0) {
+    topics.push(['systems', 1, parseInt(md5(`systems${checkout['book_id']}`).substring(0, 12), 16)]);
+  }
+
   topics.map(topic => {
     var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 3, 4);
     for (var i=0; i<nPieces; i++) {
