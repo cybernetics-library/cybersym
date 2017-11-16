@@ -74,9 +74,11 @@ class Planet {
     }
 
     // animate: spawn (scale), crashing (rotation and position)
-    new TWEEN.Tween(obj.scale).to({x:1, y:1, z:1}, 2000)
+    new TWEEN.Tween(obj.scale).to({x:2.5, y:2.5, z:2.5}, 2000)
       .easing(TWEEN.Easing.Elastic.Out).chain(
         new TWEEN.Tween(obj.position).to(target, 1000)
+        .easing(TWEEN.Easing.Exponential.In),
+        new TWEEN.Tween(obj.scale).to({x: 1, y: 1, z:1}, 1000)
         .easing(TWEEN.Easing.Exponential.In),
         new TWEEN.Tween(obj.rotation).to({
           x: util.randInt(-2, 2),
