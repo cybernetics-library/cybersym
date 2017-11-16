@@ -1,21 +1,21 @@
 import * as THREE from 'three';
 
 //code mashup of view-source:https://threejs.org/examples/canvas_geometry_birds.html
-// and https://github.com/OwenMcNaughton/Boids.js/blob/master/js/Boid.js
+// and https://github.com/OwenMcNaughton/Planets.js/blob/master/js/Planet.js
 
-var boidFactors = {};
-boidFactors.sepFac = 0.12; 
-boidFactors.cohFac = 0.03;
-boidFactors.aliFac = 0.01;
-boidFactors.tarFac = 0.31;
-boidFactors.gravFac = 1.2;
-boidFactors.maxSpeed = 0.015;
-boidFactors.maxForce = 0.001;
-boidFactors.cohDist = 0.2;
-boidFactors.sepDist = 0.2;
-boidFactors.aliDist = 0.1;
+var planetFactors = {};
+planetFactors.sepFac = 0.12; 
+planetFactors.cohFac = 0.03;
+planetFactors.aliFac = 0.01;
+planetFactors.tarFac = 0.31;
+planetFactors.gravFac = 1.2;
+planetFactors.maxSpeed = 0.015;
+planetFactors.maxForce = 0.001;
+planetFactors.cohDist = 0.2;
+planetFactors.sepDist = 0.2;
+planetFactors.aliDist = 0.1;
 
-window.boidFactors = boidFactors;
+window.planetFactors = planetFactors;
 
 var debugcounter = 0;
 var gravConstant = 0.0000001;
@@ -29,7 +29,7 @@ function sphereVolumeToRadius(v) {
   return Math.pow((3 * v / ( 4 * Math.PI)), 1/3);
 }
 
-class Boid {
+class Planet {
 
        
   constructor(config) {
@@ -79,7 +79,7 @@ class Boid {
   }
         
   static randomVel() {
-    var amp = boidFactors.maxSpeed;
+    var amp = planetFactors.maxSpeed;
     var vel = new THREE.Vector3(Math.random() * amp - (amp / 2),
       0, //Math.random() * amp - (amp / 2),
       Math.random() * amp - (amp / 2)
@@ -121,14 +121,14 @@ class Boid {
 	}
 
 
-  cohesion(boids) {
+  cohesion(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
+    planets.forEach(b => {
       var dist = self.pos.distanceTo(b.pos);
-      if(dist > 0.001 && dist < boidFactors.cohDist) {
+      if(dist > 0.001 && dist < planetFactors.cohDist) {
         sum.add(b.pos);
         count++;
       }
@@ -142,14 +142,14 @@ class Boid {
     }
   }
 
-	separation(boids) {
+	separation(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
+    planets.forEach(b => {
       var dist = self.pos.distanceTo(b.pos);
-      if(dist > 0.001 && dist < boidFactors.sepDist) {
+      if(dist > 0.001 && dist < planetFactors.sepDist) {
         var diff = new THREE.Vector3(self.pos.x, self.pos.y, self.pos.z);
         diff.sub(b.pos);
         diff.normalize();
@@ -169,9 +169,9 @@ class Boid {
     
     if(sum.lengthSq() > 0) {
       sum.normalize();
-      sum.multiplyScalar(boidFactors.maxSpeed);
+      sum.multiplyScalar(planetFactors.maxSpeed);
       sum.sub(this.vel);
-      sum.clampLength(0, boidFactors.maxForce);
+      sum.clampLength(0, planetFactors.maxForce);
     }
     return sum;
 	}
@@ -196,23 +196,23 @@ class Boid {
   seek(target) {
     this.log(this.stepcounter); 
     target.sub(this.pos);
-    target.setLength(boidFactors.maxSpeed);
+    target.setLength(planetFactors.maxSpeed);
 
     target.sub(this.vel);
-    target.clampLength(0, boidFactors.maxForce);
+    target.clampLength(0, planetFactors.maxForce);
     return target;
   }
 
-  alignment(boids) {
+  alignment(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
+    planets.forEach(b => {
       var dist = self.pos.distanceTo(b.pos);
       
       self.log("dist: " + dist);
-      if(dist > 0.001 && dist < boidFactors.aliDist) {
+      if(dist > 0.001 && dist < planetFactors.aliDist) {
         if(self.stepcounter < 5) { console.log(); }
         sum.add(b.vel);
         count++;
@@ -222,22 +222,22 @@ class Boid {
     if(count > 0) {
       sum.divideScalar(count);
       sum.normalize();
-      sum.multiplyScalar(boidFactors.maxSpeed);
+      sum.multiplyScalar(planetFactors.maxSpeed);
       sum.sub(this.vel);
-      sum.clampLength(0, boidFactors.maxForce);
+      sum.clampLength(0, planetFactors.maxForce);
       return sum;
     } else {
       return new THREE.Vector3(0, 0, 0);
     }
   }
 
-  gravity(boids) {
+  gravity(planets) {
     var sum = new THREE.Vector3(0, 0, 0);
 
     var arrowCounter = 0;
 
     var self = this;
-    boids.forEach((b, i) => {
+    planets.forEach((b, i) => {
       //console.log(b.name);
       //console.log(self.name);
       var dist = self.pos.distanceTo(b.pos);
@@ -258,43 +258,43 @@ class Boid {
 
 
 
-  moveUpdate(boids) {
+  moveUpdate(planets) {
   
-    var sep = this.separation(boids);
-    var ali = this.alignment(boids);
-    var coh = this.cohesion(boids);
+    var sep = this.separation(planets);
+    var ali = this.alignment(planets);
+    var coh = this.cohesion(planets);
 
-    var grav = this.gravity(boids)
+    var grav = this.gravity(planets)
 
     this.acc = new THREE.Vector3(0,0,0);
     
     //if(!(typeof sep === 'undefined')) {
-      //sep.multiplyScalar(boidFactors.sepFac);
+      //sep.multiplyScalar(planetFactors.sepFac);
       //this.acc.add(sep);
     //}
     //if(!(typeof ali === 'undefined')) {
-      //ali.multiplyScalar(boidFactors.aliFac);
+      //ali.multiplyScalar(planetFactors.aliFac);
       //this.acc.add(ali);
     //}
     if(!(typeof coh === 'undefined')) {
-      coh.multiplyScalar(boidFactors.cohFac);
+      coh.multiplyScalar(planetFactors.cohFac);
       this.acc.add(coh);
     }
     if(!(typeof grav === 'undefined')) {
-      grav.multiplyScalar(boidFactors.gravFac);
+      grav.multiplyScalar(planetFactors.gravFac);
       this.acc.add(grav);
     }
 
     //var tar = new THREE.Vector3(0, 1, 0);
     //tar = this.seek(tar);
-    //tar.multiplyScalar(boidFactors.tarFac);
+    //tar.multiplyScalar(planetFactors.tarFac);
     //this.acc.add(tar);
 
     //this.acc.add(this.boundSphere());
 
       
     this.vel.add(this.acc);
-    //this.vel.clampLength(0, boidFactors.maxSpeed);
+    //this.vel.clampLength(0, planetFactors.maxSpeed);
 
     this.pos.add(this.vel);
 
@@ -339,9 +339,9 @@ class Boid {
     this.mesh.rotation.z = this.rot.z;
   }
 
-  update(boids) {
+  update(planets) {
     if (this.moving == true)  {
-      this.moveUpdate(boids);
+      this.moveUpdate(planets);
     }
     this.meshUpdate();
     this.arrowUpdate();
@@ -350,4 +350,4 @@ class Boid {
 
 }
 
-export default Boid;
+export default Planet;

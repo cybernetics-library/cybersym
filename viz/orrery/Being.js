@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import Boid from './Boid';
 
 // <https://stackoverflow.com/a/13542669/1097920>
 function shadeColor(color, percent) {

@@ -2,7 +2,7 @@ import $ from 'jquery';
 import * as THREE from 'three';
 import OrbitControls from './orbit';
 import {System, Being} from './Being';
-import Boid from './Boid';
+import Planet from './Planet';
 
 var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
@@ -30,10 +30,11 @@ function Timer(callback, delay) {
 }
 
 function randomColor() {
-  var cssHSL = "hsl(" + 360 * Math.random() + ',' +
-                     (25 + 70 * Math.random()) + '%,' + 
-                     (85 + 10 * Math.random()) + '%)';
-  return cssHSL;
+  var cssHSL = "hsl(" + Math.round(360 * Math.random()) + ',' +
+                    Math.round(25 + 70 * Math.random()) + '%,' + 
+                     Math.round(45 + 10 * Math.random()) + '%)';
+//  return new THREE.Color("hsl(0, 100%, 50%)");
+  return new THREE.Color(cssHSL);
 }
 
 
@@ -79,9 +80,9 @@ class Orrery {
 		this.planets = [];
     this.planetN = 210;
     for (var i=0; i<this.planetN; i++) {
-      var planet = new Boid({ pos: Boid.randomPos(),
-                            vel: Boid.randomVel(),
-                            rot: Boid.randomRot(),
+      var planet = new Planet({ pos: Planet.randomPos(),
+                            vel: Planet.randomVel(),
+                            rot: Planet.randomRot(),
                             moving: true,
                             mass: 1,
                             attr: { color: randomColor(),
@@ -89,18 +90,18 @@ class Orrery {
                                     planetN: this.planetN } });
       this.planets.push(planet);
     }
-    //var planet = new Boid({ pos: new THREE.Vector3(1,1,1),
+    //var planet = new Planet({ pos: new THREE.Vector3(1,1,1),
                             //vel: new THREE.Vector3(0,-0.005,0),
-                            //rot: Boid.randomRot(),
+                            //rot: Planet.randomRot(),
                             //moving: true,
                             //mass: 3,
                             //attr: { color: 0x12FFF3,
                                     //name: "Moon",
                                     //planetN: this.planetN } });
     //this.planets.push(planet);
-    var planet = new Boid({ pos: new THREE.Vector3(0,0,0),
+    var planet = new Planet({ pos: new THREE.Vector3(0,0,0),
                             vel: new THREE.Vector3(0,0,0),
-                            rot: Boid.randomRot(),
+                            rot: Planet.randomRot(),
                             mass: 30,
                             moving: false,
                             attr: { color: 0xfcf80c,
