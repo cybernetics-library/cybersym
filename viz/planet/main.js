@@ -41,22 +41,24 @@ class Planet {
     var coords = util.hashToPoint(this.lastHash); // where the object spawns
     var obj = createMonument(checkout);
 
-    // add as child to planet so it follows rotation
-    this.planet.add(obj);
-    obj.position.set(coords.x, coords.y, coords.z);
-    this.objs.push(obj);
-    this.names[obj.uuid] = checkout['title'];
+    if (this.planet) {
+      // add as child to planet so it follows rotation
+      this.planet.add(obj);
+      obj.position.set(coords.x, coords.y, coords.z);
+      this.objs.push(obj);
+      this.names[obj.uuid] = checkout['title'];
 
-    // find closest point on sphere
-    var target = new THREE.Vector3();
-    target.sub(obj.position, new THREE.Vector3(0,0,0));
-    target.normalize();
-    target.multiplyScalar(config.PLANET_RADIUS);
+      // find closest point on sphere
+      var target = new THREE.Vector3();
+      target.sub(obj.position, new THREE.Vector3(0,0,0));
+      target.normalize();
+      target.multiplyScalar(config.PLANET_RADIUS);
 
-    if (animate) {
-      this.crashIntoPlanet(obj, target);
-    } else {
-      obj.position.set(target.x, target.y, target.z);
+      if (animate) {
+        this.crashIntoPlanet(obj, target);
+      } else {
+        obj.position.set(target.x, target.y, target.z);
+      }
     }
   }
 
