@@ -62,14 +62,15 @@ function valFromHash(hash, lo, hi) {
 function createMonument(checkout) {
   // generate object for topic
   var topics = sortTopics(checkout['topics'], checkout['book_id']);
-  var minHeight = 1.2/(topics.length+1),
-      baseHeight = 2.2/(topics.length+1),
-      height = 0, obj;
 
   // hack default
   if (topics.length === 0) {
     topics.push(['systems', 1, parseInt(md5(`systems${checkout['book_id']}`).substring(0, 12), 16)]);
   }
+
+  var minHeight = 1.2/(topics.length+1),
+      baseHeight = 2.2/(topics.length+1),
+      height = 0, obj;
 
   topics.map(topic => {
     var nPieces = topics.length >= 2 ? 1 : valFromHash(topic[2], 3, 4);
