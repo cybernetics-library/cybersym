@@ -44,7 +44,8 @@
           animation: bounceIn 0.5s;
           right: 1em;
           width: 30%;
-          top: 40vh;
+          top: 50%;
+          transform: translateY(-50%);
           display: none;
         }
 
@@ -88,6 +89,16 @@
             top: 1em;
             left: 1em;
             color: red;
+        }
+
+        @media only screen and (max-height: 480px) {
+            #bubble {
+                top: 1em !important;
+                left: 1em !important;
+                right: 1em !important;
+                transform: translateY(0) !important;
+                width: auto !important;
+            }
         }
 
         #stars {

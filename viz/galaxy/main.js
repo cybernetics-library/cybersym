@@ -116,6 +116,10 @@ class Space {
   }
 }
 
+document.body.addEventListener('click', function() {
+  document.body.requestFullscreen();
+});
+
 // pause/resume on
 document.addEventListener('keydown', function(ev) {
   if (ev.key == ' ') {
