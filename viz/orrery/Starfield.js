@@ -27,11 +27,11 @@ class Starfield {
           geom.vertices.push(vert);
         });
 
-        var mat = new THREE.PointCloudMaterial({
+        var mat = new THREE.PointsMaterial({
           color: new THREE.Color(col),
           size: siz,
         });
-        self.stargroup.add(new THREE.PointCloud(geom, mat));
+        self.stargroup.add(new THREE.Points(geom, mat));
 
       });
     });
