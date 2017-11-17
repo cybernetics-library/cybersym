@@ -17,7 +17,7 @@ class UI {
 
     if(turnOnPlanetFrame) {
       this.planetframe = document.getElementById('planetframe')
-      this.planetframe.innerHTML = '<iframe src="http://simulation.cybernetics.social/planet" width=' + planetFrameDim + ' height=' + planetFrameDim + '></iframe>';
+      this.planetframe.innerHTML = '<iframe src="http://localhost:8081/planet?noname" width=' + planetFrameDim + ' height=' + planetFrameDim + '></iframe>';
     } 
 
     if(turnOnPlanetName) {
@@ -67,7 +67,7 @@ class UI {
       this.planetframe.style.overflow = "hidden";
     }
 
-    this.planettooltip.innerHTML = "This is You.";
+    this.planettooltip.innerHTML = config.obj.name;
     this.planettooltip.style.left = (pos.x - 100/2) + "px";
     this.planettooltip.style.top = (pos.y - 5) + "px";
   }

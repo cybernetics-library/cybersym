@@ -216,6 +216,7 @@ function fetchData() {
         // there are new planets!
 
         _.each(diffkeys, function(k) {
+          var thisplanet = newdata[k];
           console.log(k);
 
           var planetattr = { 
@@ -223,10 +224,10 @@ function fetchData() {
                           pos: Planet.randomPos({ radius: 2 }),
                           vel: Planet.randomVel(),
                           rot: Planet.randomRot(),
-                          mass: 1,
+                          mass: thisplanet.checkouts,
                           moving: true,
-                          attr: { color: new THREE.Color(newdata[k].color),
-                                  name: "planet",
+                          attr: { color: new THREE.Color(thisplanet.color),
+                                  name: thisplanet.name,
                                   debugArrows: false,
                           }
                   }
