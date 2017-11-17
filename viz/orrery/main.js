@@ -2,10 +2,12 @@ import $ from 'jquery';
 import _ from 'lodash'
 import * as THREE from 'three';
 import Vue from 'vue'
+
+
 import OrbitControls from './orbit';
-import {System, Being} from './Being';
 import Planet from './Planet';
 import Starfield from './Starfield';
+import UI from './UI';
 
 var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
@@ -54,7 +56,11 @@ class Orrery {
 
     this.populate();
 
-    this._setupUI();
+    this.UI = new UI({
+        renderer: this.renderer,
+        scene: this.scene,
+        camera: this.camera
+    });
     // var axesHelper = new THREE.AxesHelper( 5 );
     // this.scene.add( axesHelper );
   }
@@ -77,21 +83,6 @@ class Orrery {
     });
     this.starfield.addToScene(this.orrery);
 
-	///// systems
-    this.systems = [];
-    var birds = new System(20, [8,16],
-      new THREE.ConeGeometry(0.01, 0.23, 4),
-      '#f3ff21', 0.1);
-    birds.beings.forEach(b => {
-      b.velocity = {
-        x: (Math.random() - 1)/200,
-        y: (Math.random() - 1)/200
-      }
-    });
-    this.systems.push(birds);
-    this.systems.forEach(s => s.beings.forEach(b => this.orrery.add(b.group)));
-
-    window.birds = birds;
     window.THREE = THREE;
 
 ///// planets
@@ -108,7 +99,7 @@ class Orrery {
                             attr: { color: randomColor(),
                                     name: "Planet-" + i,
                                     planetN: this.planetN,
-                                    debugArrows: true,
+                                    debugArrows: false,
                                      }
                          }
       this.addPlanet(planetattr);
@@ -149,7 +140,6 @@ class Orrery {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
 //    this.orrery.rotation.y += 0.001;
-		this.systems.forEach(s => s.update());
     _.each(self.planets, function(v, k) {
        v.update(self.planets)
     });
@@ -197,32 +187,6 @@ class Orrery {
 
   }
 
-  _setupUI() {
-    this.tooltip = document.getElementById('tooltip')
-
-    this.renderer.domElement.addEventListener('mousemove', ev => {
-      var mouse = {
-        x: (ev.clientX/this.renderer.domElement.clientWidth) * 2 - 1,
-        y: -(ev.clientY/this.renderer.domElement.clientHeight) * 2 + 1
-      };
-      var raycaster = new THREE.Raycaster();
-          raycaster.setFromCamera(mouse, this.camera);
-
-      var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "planetGroup" , true).children, true);
-      if (intersects.length > 0) {
-        var obj = intersects[0].object;
-        this.tooltip.innerHTML = obj.name;
-        this.tooltip.style.left = `${ev.clientX + 20}px`;
-        this.tooltip.style.top = `${ev.clientY}px`;
-        this.tooltip.style.display = 'block';
-      } else {
-        this.tooltip.style.display = 'none';
-      }
-    }, false);
-  }
-
-
-
 
   _setupLights() {
     var pointLight = new THREE.PointLight(0xffffff, 0.3, 50);
@@ -265,7 +229,7 @@ function fetchData() {
                           moving: true,
                           attr: { color: new THREE.Color(newdata[k].color),
                                   name: "planet",
-                                  debugArrows: true,
+                                  debugArrows: false,
                           }
                   }
           console.log(planetattr);

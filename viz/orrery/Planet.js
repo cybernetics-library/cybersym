@@ -23,6 +23,11 @@ planetFactors.maxDistFromCenter = 3;
 
 window.planetFactors = planetFactors;
 
+
+var planetStatic = {};
+planetStatic.origin = new THREE.Vector3(0,0,0);
+
+
 var debugcounter = 0;
 var gravConstant = 0.0000001;
 
@@ -209,13 +214,12 @@ class Planet {
 
 	boundSphere() {
 
-    var origin = new THREE.Vector3(0,0,0);
-    var dist = this.pos.distanceTo(origin);
+    var dist = this.pos.distanceTo(planetStatic.origin);
 
     if(dist > planetFactors.maxDistFromCenter) {
       var steer = new THREE.Vector3();
       steer.copy( this.pos );
-      steer.sub( origin );
+      steer.sub( planetStatic.origin );
       steer.setLength(0.1 / Math.pow((dist - planetFactors.maxDistFromCenter), 2));
       steer.negate();
       return steer;
@@ -358,11 +362,6 @@ class Planet {
       this.acc.add(sunPullF);
     }
 
-    var sunPullF = this.pullTowardsSun();
-    if(!(typeof sunPullF === 'undefined')) {
-      sunPullF.multiplyScalar(planetFactors.sunPullFac);
-      this.acc.add(sunPullF);
-    }
 
     var clampF = this.clampToXZ();
     if(!(typeof clampF === 'undefined')) {
