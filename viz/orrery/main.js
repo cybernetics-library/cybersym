@@ -1,17 +1,17 @@
 import $ from 'jquery';
+import _ from 'lodash'
 import * as THREE from 'three';
+import Vue from 'vue'
+
+
 import OrbitControls from './orbit';
-import {System, Being} from './Being';
-import Boid from './Boid';
+import Planet from './Planet';
+import Starfield from './Starfield';
+import UI from './UI';
 
 var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
 
-
-function choice(choices) {
-  var idx = Math.floor(Math.random() * choices.length);
-  return choices[idx];
-}
 
 function Timer(callback, delay) {
   var timerId, start, remaining = delay;
@@ -30,10 +30,11 @@ function Timer(callback, delay) {
 }
 
 function randomColor() {
-  var cssHSL = "hsl(" + 360 * Math.random() + ',' +
-                     (25 + 70 * Math.random()) + '%,' + 
-                     (85 + 10 * Math.random()) + '%)';
-  return cssHSL;
+  var cssHSL = "hsl(" + Math.round(360 * Math.random()) + ',' +
+                    Math.round(25 + 70 * Math.random()) + '%,' + 
+                     Math.round(45 + 10 * Math.random()) + '%)';
+//  return new THREE.Color("hsl(0, 100%, 50%)");
+  return new THREE.Color(cssHSL);
 }
 
 
@@ -42,84 +43,106 @@ class Orrery {
     this._setupScene();
     this._setupLights();
 
-    var geometry = new THREE.SphereGeometry(1, 32, 32);
-    // var material = new THREE.MeshBasicMaterial({color: 0x93bcff});
-		var material = new THREE.MeshPhongMaterial({color: 0x93bcff, shading: THREE.FlatShading, wireframe: true});
+    var group = new THREE.Group();
+
+    this.scene.add(group)
+    this.orrery = group;
+
+    this.planetGroup = new THREE.Group();
+    this.planetGroup.name = "planetGroup";
+		this.orrery.add(this.planetGroup);
+
+    this.planets = {};
 
     this.populate();
 
-    this._setupUI();
+    this.UI = new UI({
+        renderer: this.renderer,
+        scene: this.scene,
+        camera: this.camera
+    });
     // var axesHelper = new THREE.AxesHelper( 5 );
     // this.scene.add( axesHelper );
   }
 
+
+  addPlanet(planetattr) {
+    var planet = new Planet(planetattr);
+    this.planets[planet.id] = planet;
+    planet.addToScene(this.planetGroup);
+  }
+
   populate() {
 
-	///// systems
-    this.systems = [];
-    var birds = new System(20, [8,16],
-      new THREE.ConeGeometry(0.01, 0.23, 4),
-      '#f3ff21', 0.1);
-    birds.beings.forEach(b => {
-      b.velocity = {
-        x: (Math.random() - 1)/200,
-        y: (Math.random() - 1)/200
-      }
+    this.starfield = new Starfield({
+      count: 500,
+      distance: 100,
+      size_range: [0.1, 1.0],
+      size_count: 4,
+      colors: [0xffffff, 0xEEEEEE, 0xDDDDDD]
     });
-    this.systems.push(birds);
-    this.systems.forEach(s => s.beings.forEach(b => this.scene.add(b.group)));
+    this.starfield.addToScene(this.orrery);
 
-    window.birds = birds;
     window.THREE = THREE;
 
 ///// planets
-    this.planetGroup = new THREE.Group();
-    this.planetGroup.name = "planetGroup";
 
-		this.planets = [];
     this.planetN = 210;
     for (var i=0; i<this.planetN; i++) {
-      var planet = new Boid({ pos: Boid.randomPos(),
-                            vel: Boid.randomVel(),
-                            rot: Boid.randomRot(),
+      var planetattr = { 
+                            id: "randomplanet-" + i,
+                            pos: Planet.randomPos(),
+                            vel: Planet.randomVel(),
+                            rot: Planet.randomRot(),
                             moving: true,
                             mass: 1,
                             attr: { color: randomColor(),
                                     name: "Planet-" + i,
-                                    planetN: this.planetN } });
-      this.planets.push(planet);
+                                    planetN: this.planetN,
+                                    debugArrows: false,
+                                     }
+                         }
+      this.addPlanet(planetattr);
+    
     }
-    //var planet = new Boid({ pos: new THREE.Vector3(1,1,1),
-                            //vel: new THREE.Vector3(0,-0.005,0),
-                            //rot: Boid.randomRot(),
+    ////var moonattr = { pos: new THREE.Vector3(1,1,1),
+                            ////vel: new THREE.Vector3(0,-0.005,0),
+                            //rot: Planet.randomRot(),
                             //moving: true,
                             //mass: 3,
                             //attr: { color: 0x12FFF3,
                                     //name: "Moon",
-                                    //planetN: this.planetN } });
-    //this.planets.push(planet);
-    var planet = new Boid({ pos: new THREE.Vector3(0,0,0),
+                                    //planetN: this.planetN }
+                     // }
+    //this.addPlanet(moonattr);
+
+    var sunattr = { 
+                            id: "sunsunun",
+                            pos: new THREE.Vector3(0,0,0),
                             vel: new THREE.Vector3(0,0,0),
-                            rot: Boid.randomRot(),
+                            rot: Planet.randomRot(),
                             mass: 30,
                             moving: false,
                             attr: { color: 0xfcf80c,
                                     name: "Sun",
-                                    planetN: this.planetN } });
-    this.planets.push(planet);
+                                    debugArrows: false,
+                            }
+                    }
+    this.addPlanet(sunattr);
 
-    this.planets.forEach(p => p.addToScene(this.planetGroup));
-		this.scene.add(this.planetGroup);
 
     window.planets = this.planets;
 
   }
 
   render() {
+    var self = this;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
-		this.systems.forEach(s => s.update());
-    this.planets.forEach(b => b.update(this.planets));
+//    this.orrery.rotation.y += 0.001;
+    _.each(self.planets, function(v, k) {
+       v.update(self.planets)
+    });
   }
 
   _setupScene() {
@@ -164,32 +187,6 @@ class Orrery {
 
   }
 
-  _setupUI() {
-    this.tooltip = document.getElementById('tooltip')
-
-    this.renderer.domElement.addEventListener('mousemove', ev => {
-      var mouse = {
-        x: (ev.clientX/this.renderer.domElement.clientWidth) * 2 - 1,
-        y: -(ev.clientY/this.renderer.domElement.clientHeight) * 2 + 1
-      };
-      var raycaster = new THREE.Raycaster();
-          raycaster.setFromCamera(mouse, this.camera);
-
-      var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "planetGroup" , true).children, true);
-      if (intersects.length > 0) {
-        var obj = intersects[0].object;
-        this.tooltip.innerHTML = obj.name;
-        this.tooltip.style.left = `${ev.clientX + 20}px`;
-        this.tooltip.style.top = `${ev.clientY}px`;
-        this.tooltip.style.display = 'block';
-      } else {
-        this.tooltip.style.display = 'none';
-      }
-    }, false);
-  }
-
-
-
 
   _setupLights() {
     var pointLight = new THREE.PointLight(0xffffff, 0.3, 50);
@@ -200,6 +197,67 @@ class Orrery {
   }
 }
 
+/////////////////////
+/////////////////////
+//
+
+var APIbase = "http://library.cybernetics.social"
+var planets_endpoint = "/planets"
+var data = {}; data.planets = {};
+var fetchTimer;
+
+function startApiLoop() {
+    fetchData();
+    fetchTimer = setInterval(fetchData, 1 * 1000)
+  }
+
+function fetchData() {
+  $.getJSON(APIbase + planets_endpoint, function(newdata) {
+    if(!(_.isEqual(data, newdata))) {
+      var diffkeys = _.difference(_.keys(newdata), _.keys(data));
+      if( diffkeys.length > 0) {
+
+        _.each(diffkeys, function(k) {
+          console.log(k);
+
+          var planetattr = { 
+                          id: k,
+                          pos: Planet.randomPos(),
+                          vel: Planet.randomVel(),
+                          rot: Planet.randomRot(),
+                          mass: 1,
+                          moving: true,
+                          attr: { color: new THREE.Color(newdata[k].color),
+                                  name: "planet",
+                                  debugArrows: false,
+                          }
+                  }
+          console.log(planetattr);
+          orrery.addPlanet(planetattr);
+
+        });
+        // there are new planets!
+        data = newdata;
+      } else {
+
+        // no new planets, but planet attributes have changed
+        console.log("no new planets, but planet attributes have changed");
+        data = newdata;
+      }
+    } else {
+      // nothing has changed!
+      console.log("no change");
+    }
+  })
+}
+
+
+///////////////////
+////////////////////
+//
+window.THREE = THREE;
 var orrery = new Orrery();
 window.orrery = orrery;
 orrery.render();
+startApiLoop();
+

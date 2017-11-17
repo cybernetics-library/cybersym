@@ -108,7 +108,6 @@ def planet(id):
         name=name_from_id(id)
     )
 
-
 @app.route('/planets')
 def planets():
     """returns checkout planet info for all attendees"""

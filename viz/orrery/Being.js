@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import Boid from './Boid';
 
 // <https://stackoverflow.com/a/13542669/1097920>
 function shadeColor(color, percent) {
@@ -89,7 +88,7 @@ class Being {
       thisgeo.applyMatrix( new THREE.Matrix4().makeRotationX(  Math.PI / 2 ) );
       var member = new THREE.Mesh(thisgeo, material);
       var box = new THREE.Box3().setFromObject(member);
-      var height = box.size().y;
+      var height = box.getSize().y;
       member.s = new THREE.Spherical(
         1+altitude+height/2,
         center.x + (Math.random() - 1)/8,

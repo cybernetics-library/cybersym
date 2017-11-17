@@ -1,21 +1,32 @@
 import * as THREE from 'three';
+import _ from 'lodash'
 
 //code mashup of view-source:https://threejs.org/examples/canvas_geometry_birds.html
-// and https://github.com/OwenMcNaughton/Boids.js/blob/master/js/Boid.js
+// and https://github.com/OwenMcNaughton/Planets.js/blob/master/js/Planet.js
 
-var boidFactors = {};
-boidFactors.sepFac = 0.12; 
-boidFactors.cohFac = 0.03;
-boidFactors.aliFac = 0.01;
-boidFactors.tarFac = 0.31;
-boidFactors.gravFac = 1.2;
-boidFactors.maxSpeed = 0.015;
-boidFactors.maxForce = 0.001;
-boidFactors.cohDist = 0.2;
-boidFactors.sepDist = 0.2;
-boidFactors.aliDist = 0.1;
+var planetFactors = {};
+planetFactors.sepFac = 0.32; 
+planetFactors.cohFac = 0.03;
+planetFactors.aliFac = 0.00;
+planetFactors.tarFac = 0.31;
+planetFactors.gravFac = 0.5;
+planetFactors.maxSpeed = 0.005;
+planetFactors.maxForce = 0.001;
+planetFactors.cohDist = 0.2;
+planetFactors.sepDist = 0.2;
+planetFactors.aliDist = 0.1;
+planetFactors.boundFac = 0.1;
+planetFactors.swirlFac = 0.1;
+planetFactors.sunPullFac = 0.1;
+planetFactors.clampXYFac = 0.1;
+planetFactors.maxDistFromCenter = 3;
 
-window.boidFactors = boidFactors;
+window.planetFactors = planetFactors;
+
+
+var planetStatic = {};
+planetStatic.origin = new THREE.Vector3(0,0,0);
+
 
 var debugcounter = 0;
 var gravConstant = 0.0000001;
@@ -29,16 +40,22 @@ function sphereVolumeToRadius(v) {
   return Math.pow((3 * v / ( 4 * Math.PI)), 1/3);
 }
 
-class Boid {
+class Planet {
 
        
   constructor(config) {
+    this.id = config.id;
     this.pos = config.pos.clone();
     this.vel = config.vel.clone();
     this.rot = config.rot.clone();
     this.mass = config.mass;
     this.moving = config.moving;
     this.attributes = config.attr;
+
+    if (!('debugArrows' in this.attributes)) {
+      this.attributes.debugArrows = false;
+    } 
+
 
     this.acc = new THREE.Vector3(0, 0, 0);
     
@@ -59,27 +76,23 @@ class Boid {
 
     this.stepcounter = 0;
 
-    this.velArrow = new THREE.ArrowHelper(this.vel, this.pos, 1, 0x67abef);
-    this.accArrow = new THREE.ArrowHelper(this.acc, this.pos, 1, 0xd366ef);
+    if(this.attributes.debugArrows) {
+      this.velArrow = new THREE.ArrowHelper(this.vel, this.pos, 1, 0x67abef);
+      this.accArrow = new THREE.ArrowHelper(this.acc, this.pos, 1, 0xd366ef);
+    }
 
-    //this.gravityArrows = [];
-    //for(var i = 0; i < this.attributes.planetN - 1; i++) {
-      //var arr = new THREE.ArrowHelper(this.vel, this.pos, 1, 0xff0fF0);
-      //arr.name = "arrow-" + this.mesh.name + "-" + i 
-      //this.gravityArrows.push(arr);
-    //}
 
   } 
 
   static randomPos() {
     var posx = Math.random() * 4 - 2;
-    var posy = 0; //Math.random() * 3 - 1 ;
+    var posy = Math.random() * 3 - 1 ;
     var posz = Math.random() * 4 - 2 ;
     return new THREE.Vector3(posx, posy, posz);
   }
         
   static randomVel() {
-    var amp = boidFactors.maxSpeed;
+    var amp = planetFactors.maxSpeed;
     var vel = new THREE.Vector3(Math.random() * amp - (amp / 2),
       0, //Math.random() * amp - (amp / 2),
       Math.random() * amp - (amp / 2)
@@ -97,11 +110,11 @@ class Boid {
 
   addToScene(scene) {
     scene.add(this.mesh);
-    scene.add(this.velArrow);
-    scene.add(this.accArrow);
-    //this.gravityArrows.forEach(arr => {
-      //scene.add(arr)
-    //});
+
+    if(this.attributes.debugArrows) {
+      scene.add(this.velArrow);
+      scene.add(this.accArrow);
+    }
   }
 
   setGoal(target) {
@@ -121,15 +134,15 @@ class Boid {
 	}
 
 
-  cohesion(boids) {
+  cohesion(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
-      var dist = self.pos.distanceTo(b.pos);
-      if(dist > 0.001 && dist < boidFactors.cohDist) {
-        sum.add(b.pos);
+    _.each(planets, function(p, id) {
+      var dist = self.pos.distanceTo(p.pos);
+      if(dist > 0.001 && dist < planetFactors.cohDist) {
+        sum.add(p.pos);
         count++;
       }
     });
@@ -142,16 +155,16 @@ class Boid {
     }
   }
 
-	separation(boids) {
+	separation(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
-      var dist = self.pos.distanceTo(b.pos);
-      if(dist > 0.001 && dist < boidFactors.sepDist) {
+    _.each(planets, function(p, id) {
+      var dist = self.pos.distanceTo(p.pos);
+      if(dist > 0.001 && dist < planetFactors.sepDist) {
         var diff = new THREE.Vector3(self.pos.x, self.pos.y, self.pos.z);
-        diff.sub(b.pos);
+        diff.sub(p.pos);
         diff.normalize();
         diff.divideScalar(dist);
         sum.add(diff);
@@ -169,9 +182,9 @@ class Boid {
     
     if(sum.lengthSq() > 0) {
       sum.normalize();
-      sum.multiplyScalar(boidFactors.maxSpeed);
+      sum.multiplyScalar(planetFactors.maxSpeed);
       sum.sub(this.vel);
-      sum.clampLength(0, boidFactors.maxForce);
+      sum.clampLength(0, planetFactors.maxForce);
     }
     return sum;
 	}
@@ -184,37 +197,59 @@ class Boid {
     return steer;
   }
 
-  wrapBounds() {
-    if ( this.pos.x >   bound_width ) this.pos.x = - bound_width;
-    if ( this.pos.x < - bound_width ) this.pos.x =   bound_width;
-    if ( this.pos.y >   bound_height ) this.pos.y = - bound_height;
-    if ( this.pos.y < - bound_height ) this.pos.y =  bound_height;
-    if ( this.pos.z >  bound_depth ) this.pos.z = - bound_depth;
-    if ( this.pos.z < - bound_depth ) this.pos.z =  bound_depth;
+
+  clampToXZ() {
+    var steer = new THREE.Vector3();
+    var proj = new THREE.Vector3();
+
+    steer.copy( this.pos );
+    proj.copy( this.pos );
+    proj.y = 0;
+    steer.sub( proj );
+    steer.negate();
+    steer.clampLength(0, planetFactors.maxForce);
+    return steer;
   }
+
+
+	boundSphere() {
+
+    var dist = this.pos.distanceTo(planetStatic.origin);
+
+    if(dist > planetFactors.maxDistFromCenter) {
+      var steer = new THREE.Vector3();
+      steer.copy( this.pos );
+      steer.sub( planetStatic.origin );
+      steer.setLength(0.1 / Math.pow((dist - planetFactors.maxDistFromCenter), 2));
+      steer.negate();
+      return steer;
+    }
+  }
+  
+  
 
   seek(target) {
     this.log(this.stepcounter); 
     target.sub(this.pos);
-    target.setLength(boidFactors.maxSpeed);
+    target.setLength(planetFactors.maxSpeed);
 
     target.sub(this.vel);
-    target.clampLength(0, boidFactors.maxForce);
+    target.clampLength(0, planetFactors.maxForce);
     return target;
   }
 
-  alignment(boids) {
+  alignment(planets) {
     var count = 0;
     var sum = new THREE.Vector3(0, 0, 0);
    
     var self = this;
-    boids.forEach(b => {
-      var dist = self.pos.distanceTo(b.pos);
+    _.each(planets, function(p, id) {
+      var dist = self.pos.distanceTo(p.pos);
       
       self.log("dist: " + dist);
-      if(dist > 0.001 && dist < boidFactors.aliDist) {
+      if(dist > 0.001 && dist < planetFactors.aliDist) {
         if(self.stepcounter < 5) { console.log(); }
-        sum.add(b.vel);
+        sum.add(p.vel);
         count++;
       }
     })
@@ -222,32 +257,32 @@ class Boid {
     if(count > 0) {
       sum.divideScalar(count);
       sum.normalize();
-      sum.multiplyScalar(boidFactors.maxSpeed);
+      sum.multiplyScalar(planetFactors.maxSpeed);
       sum.sub(this.vel);
-      sum.clampLength(0, boidFactors.maxForce);
+      sum.clampLength(0, planetFactors.maxForce);
       return sum;
     } else {
       return new THREE.Vector3(0, 0, 0);
     }
   }
 
-  gravity(boids) {
+  gravity(planets) {
     var sum = new THREE.Vector3(0, 0, 0);
 
     var arrowCounter = 0;
 
     var self = this;
-    boids.forEach((b, i) => {
+    _.each(planets, function(p, id) {
       //console.log(b.name);
       //console.log(self.name);
-      var dist = self.pos.distanceTo(b.pos);
-      if((b.name != self.name) && (dist > (self.radius + b.radius))) {
+      var dist = self.pos.distanceTo(p.pos);
+      if((p.name != self.name) && (dist > (self.radius + p.radius))) {
         var target = new THREE.Vector3();
-        target.copy( b.pos );
+        target.copy( p.pos );
         target.sub(self.pos);
 
         // https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
-        target.setLength((gravConstant * b.mass) / Math.pow(dist, 2));
+        target.setLength((gravConstant * p.mass) / Math.pow(dist, 2));
         sum.add(target);
 
       }
@@ -256,45 +291,93 @@ class Boid {
     return sum;
    }
 
+	swirl() {
+
+		var steer = new THREE.Vector3();
+		steer.copy( this.pos );
+		var up = new THREE.Vector3(0,1,0);
+		steer.applyAxisAngle ( up , Math.PI / 2 )
+
+		steer.setLength(1)
+		steer.setLength(this.mass / 1000)
+
+		return steer;
+  }
+
+	pullTowardsSun() {
+		var steer = new THREE.Vector3();
+		steer.copy( this.pos );
+		steer.negate();
+		steer.setLength(this.mass / 1000)
+
+		return steer;
+  }
 
 
-  moveUpdate(boids) {
+
+  moveUpdate(planets) {
   
-    var sep = this.separation(boids);
-    var ali = this.alignment(boids);
-    var coh = this.cohesion(boids);
-
-    var grav = this.gravity(boids)
 
     this.acc = new THREE.Vector3(0,0,0);
     
-    //if(!(typeof sep === 'undefined')) {
-      //sep.multiplyScalar(boidFactors.sepFac);
-      //this.acc.add(sep);
-    //}
-    //if(!(typeof ali === 'undefined')) {
-      //ali.multiplyScalar(boidFactors.aliFac);
-      //this.acc.add(ali);
-    //}
+    var sep = this.separation(planets);
+    if(!(typeof sep === 'undefined')) {
+      sep.multiplyScalar(planetFactors.sepFac);
+      this.acc.add(sep);
+    }
+
+    var ali = this.alignment(planets);
+    if(!(typeof ali === 'undefined')) {
+      ali.multiplyScalar(planetFactors.aliFac);
+      this.acc.add(ali);
+    }
+
+    var coh = this.cohesion(planets);
     if(!(typeof coh === 'undefined')) {
-      coh.multiplyScalar(boidFactors.cohFac);
+      coh.multiplyScalar(planetFactors.cohFac);
       this.acc.add(coh);
     }
+
+    var grav = this.gravity(planets)
     if(!(typeof grav === 'undefined')) {
-      grav.multiplyScalar(boidFactors.gravFac);
+      grav.multiplyScalar(planetFactors.gravFac);
       this.acc.add(grav);
     }
 
+    var boundF = this.boundSphere();
+    if(!(typeof boundF === 'undefined')) {
+      boundF.multiplyScalar(planetFactors.boundFac);
+      this.acc.add(boundF);
+    }
+
+    var swirlF = this.swirl();
+    if(!(typeof swirlF === 'undefined')) {
+      swirlF.multiplyScalar(planetFactors.swirlFac);
+      this.acc.add(swirlF);
+    }
+
+    var sunPullF = this.pullTowardsSun();
+    if(!(typeof sunPullF === 'undefined')) {
+      sunPullF.multiplyScalar(planetFactors.sunPullFac);
+      this.acc.add(sunPullF);
+    }
+
+
+    var clampF = this.clampToXZ();
+    if(!(typeof clampF === 'undefined')) {
+      clampF.multiplyScalar(planetFactors.clampXYFac);
+      this.acc.add(clampF);
+    }
     //var tar = new THREE.Vector3(0, 1, 0);
     //tar = this.seek(tar);
-    //tar.multiplyScalar(boidFactors.tarFac);
+    //tar.multiplyScalar(planetFactors.tarFac);
     //this.acc.add(tar);
 
     //this.acc.add(this.boundSphere());
 
       
     this.vel.add(this.acc);
-    //this.vel.clampLength(0, boidFactors.maxSpeed);
+    this.vel.clampLength(0, planetFactors.maxSpeed);
 
     this.pos.add(this.vel);
 
@@ -308,12 +391,11 @@ class Boid {
 
 
     var self = this;
- //    this.wrapBounds();
   }
 
   arrowUpdate() {
     this.accArrow.setDirection(this.acc);
-    this.accArrow.setLength(Math.max(0.001, this.acc.length() * 500));
+    this.accArrow.setLength(Math.max(0.001, this.acc.length() * 200));
     this.accArrow.position.x = this.pos.x;
     this.accArrow.position.y = this.pos.y;
     this.accArrow.position.z = this.pos.z;
@@ -322,11 +404,6 @@ class Boid {
     this.velArrow.position.x = this.pos.x;
     this.velArrow.position.y = this.pos.y;
     this.velArrow.position.z = this.pos.z;
-    //this.gravityArrows.forEach(arr => {
-      //arr.position.x = self.pos.x;
-      //arr.position.y = self.pos.y;
-      //arr.position.z = self.pos.z;
-    //});
 
    }
 
@@ -339,15 +416,15 @@ class Boid {
     this.mesh.rotation.z = this.rot.z;
   }
 
-  update(boids) {
-    if (this.moving == true)  {
-      this.moveUpdate(boids);
-    }
+  update(planets) {
+    if (this.moving == true)  {  this.moveUpdate(planets); }
     this.meshUpdate();
-    this.arrowUpdate();
+    if(this.attributes.debugArrows) {  this.arrowUpdate(); }
     this.stepcounter ++;
 	}
 
 }
 
-export default Boid;
+export default Planet;
+
+
