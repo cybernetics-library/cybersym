@@ -111,15 +111,17 @@ def planet(id):
 @app.route('/planets')
 def planets():
     """returns checkout planet info for all attendees"""
-    planets = defaultdict(lambda: {'topic_mixture': []})
+    planets = defaultdict(lambda: {'topic_mixture': [], 'checkouts': 0})
     for checkout in db['checkouts'].all():
         book_id = checkout['book_id']
         topic_mixture = LIBRARY['books'][book_id]['topics']
         planets[checkout['attendee_id']]['topic_mixture'].append(topic_mixture)
+        planets[checkout['attendee_id']]['checkouts'] += 1
 
     for id, d in planets.items():
         d['topic_mixture'] = mix_topics(*d['topic_mixture'])
         d['color'] = ColorHash(id).hex
+        d['name'] = name_from_id(id)
     return jsonify(**planets)
 
 
