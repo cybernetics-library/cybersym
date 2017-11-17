@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import _ from 'lodash'
+import './GeometryUtils.js'
 
 //code mashup of view-source:https://threejs.org/examples/canvas_geometry_birds.html
 // and https://github.com/OwenMcNaughton/Planets.js/blob/master/js/Planet.js
@@ -18,7 +19,7 @@ planetFactors.aliDist = 0.1;
 planetFactors.boundFac = 0.1;
 planetFactors.swirlFac = 0.1;
 planetFactors.sunPullFac = 0.1;
-planetFactors.clampXYFac = 0.1;
+planetFactors.clampXYFac = 0.2;
 planetFactors.maxDistFromCenter = 3;
 
 window.planetFactors = planetFactors;
@@ -84,11 +85,11 @@ class Planet {
 
   } 
 
-  static randomPos() {
-    var posx = Math.random() * 4 - 2;
-    var posy = Math.random() * 3 - 1 ;
-    var posz = Math.random() * 4 - 2 ;
-    return new THREE.Vector3(posx, posy, posz);
+  static randomPos(config) {
+    var randomDirection = new THREE.Vector3(Math.random()-0.5,Math.random()-0.5,Math.random()-0.5).normalize();
+    var radius3 = Math.random() * config.radius + 1;
+    randomDirection.multiplyScalar(radius3);
+    return randomDirection.clone();
   }
         
   static randomVel() {

@@ -11,6 +11,7 @@ import UI from './UI';
 
 var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
+var timerCounter = 0;
 
 
 function Timer(callback, delay) {
@@ -54,6 +55,8 @@ class Orrery {
 
     this.planets = {};
 
+    this.planetFocusID = null;
+
     this.populate();
 
     this.UI = new UI({
@@ -70,12 +73,13 @@ class Orrery {
     var planet = new Planet(planetattr);
     this.planets[planet.id] = planet;
     planet.addToScene(this.planetGroup);
+    this.planetFocusID = planet.id
   }
 
   populate() {
 
     this.starfield = new Starfield({
-      count: 500,
+      count: 5000,
       distance: 100,
       size_range: [0.1, 1.0],
       size_count: 4,
@@ -91,7 +95,7 @@ class Orrery {
     for (var i=0; i<this.planetN; i++) {
       var planetattr = { 
                             id: "randomplanet-" + i,
-                            pos: Planet.randomPos(),
+                            pos: Planet.randomPos({ radius: 2}),
                             vel: Planet.randomVel(),
                             rot: Planet.randomRot(),
                             moving: true,
@@ -136,13 +140,22 @@ class Orrery {
   }
 
   render() {
+    timerCounter++;
     var self = this;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
-//    this.orrery.rotation.y += 0.001;
+    this.orrery.rotation.y += 0.002;
+    this.orrery.rotation.x = Math.sin(timerCounter / 100) / 20;
     _.each(self.planets, function(v, k) {
        v.update(self.planets)
     });
+
+    if(this.planetFocusID in this.planets) {
+      this.UI.movePlanetFrame({
+        obj: this.planets[this.planetFocusID],
+        pos: this.planets[this.planetFocusID].pos
+      });
+    }
   }
 
   _setupScene() {
@@ -162,13 +175,13 @@ class Orrery {
     this.scene = new THREE.Scene();
     if (CAMERATYPE === 'persp') {
       this.camera = new THREE.PerspectiveCamera(45, aspect, .1, 20000);
-      this.camera.zoom = 2;
+      this.camera.zoom = 1;
     } else {
       this.camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000),
       this.camera.zoom = 0.08;
     }
 
-    this.camera.position.set(-5, 5, 5);
+    this.camera.position.set(-3, 3, 3);
     this.camera.lookAt(this.scene.position);
     this.camera.updateProjectionMatrix();
 
@@ -204,6 +217,7 @@ class Orrery {
 var APIbase = "http://library.cybernetics.social"
 var planets_endpoint = "/planets"
 var data = {}; data.planets = {};
+var planetFocusID;
 var fetchTimer;
 
 function startApiLoop() {
@@ -216,13 +230,14 @@ function fetchData() {
     if(!(_.isEqual(data, newdata))) {
       var diffkeys = _.difference(_.keys(newdata), _.keys(data));
       if( diffkeys.length > 0) {
+        // there are new planets!
 
         _.each(diffkeys, function(k) {
           console.log(k);
 
           var planetattr = { 
                           id: k,
-                          pos: Planet.randomPos(),
+                          pos: Planet.randomPos({ radius: 2 }),
                           vel: Planet.randomVel(),
                           rot: Planet.randomRot(),
                           mass: 1,
@@ -236,17 +251,28 @@ function fetchData() {
           orrery.addPlanet(planetattr);
 
         });
-        // there are new planets!
         data = newdata;
       } else {
-
         // no new planets, but planet attributes have changed
+
+				function diffBetweenObjects(a, b) { 
+					// from https://stackoverflow.com/questions/31683075/how-to-do-a-deep-comparison-between-2-objects-with-lodash
+					return _.reduce(a, function(result, value, key) {
+							return _.isEqual(value, b[key]) ?
+									result : result.concat(key);
+					}, []);
+        }
+        var diff = diffBetweenObjects(data, newdata);
+        orrery.planetFocusID = diff[0];
+							
         console.log("no new planets, but planet attributes have changed");
+        console.log(diff);
         data = newdata;
       }
     } else {
       // nothing has changed!
       console.log("no change");
+
     }
   })
 }
