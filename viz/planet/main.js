@@ -91,6 +91,9 @@ class Planet {
   }
 }
 
+document.body.addEventListener('click', function() {
+  document.body.requestFullscreen();
+});
 
 var space = new Space();
 var planet, lastCheckout;
