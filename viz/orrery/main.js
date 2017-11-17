@@ -1,17 +1,15 @@
 import $ from 'jquery';
+import _ from 'lodash'
 import * as THREE from 'three';
+import Vue from 'vue'
 import OrbitControls from './orbit';
 import {System, Being} from './Being';
 import Planet from './Planet';
+import Starfield from './Starfield';
 
 var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
 
-
-function choice(choices) {
-  var idx = Math.floor(Math.random() * choices.length);
-  return choices[idx];
-}
 
 function Timer(callback, delay) {
   var timerId, start, remaining = delay;
@@ -51,6 +49,12 @@ class Orrery {
     this.scene.add(group)
     this.orrery = group;
 
+    this.planetGroup = new THREE.Group();
+    this.planetGroup.name = "planetGroup";
+		this.orrery.add(this.planetGroup);
+
+    this.planets = {};
+
     this.populate();
 
     this._setupUI();
@@ -58,33 +62,24 @@ class Orrery {
     // this.scene.add( axesHelper );
   }
 
+
+  addPlanet(planetattr) {
+    var planet = new Planet(planetattr);
+    this.planets[planet.id] = planet;
+    planet.addToScene(this.planetGroup);
+  }
+
   populate() {
-////// stars
 
-
-	var distance = 100;
-	var geometry = new THREE.Geometry();
-
-	for (var i = 0; i < 10000; i++) {
-
-		var vertex = new THREE.Vector3();
-
-		var theta = THREE.Math.randFloatSpread(360);
-		var phi = THREE.Math.randFloatSpread(360);
-
-		vertex.x = distance * Math.sin(theta) * Math.cos(phi);
-		vertex.y = distance * Math.sin(theta) * Math.sin(phi);
-		vertex.z = distance * Math.cos(theta);
-
-		geometry.vertices.push(vertex);
-	}
-	var particles = new THREE.PointCloud(geometry, new THREE.PointCloudMaterial({
-		color: 0xffffff,
-		size: 0.5
-	}));
-	particles.boundingSphere = 5;
-	this.orrery.add(particles);
-
+    this.starfield = new Starfield({
+      count: 5000,
+      distance: 100,
+      size_range: [0.2, 1.0],
+      size_count: 4,
+      colors: [0xffffff, 0xEEEEEE, 0xDDDDDD]
+    });
+    this.starfield.addToScene(this.orrery);
+    this.orrery.add(this.starfield.particles)
 
 	///// systems
     this.systems = [];
@@ -104,54 +99,62 @@ class Orrery {
     window.THREE = THREE;
 
 ///// planets
-    this.planetGroup = new THREE.Group();
-    this.planetGroup.name = "planetGroup";
 
-		this.planets = [];
-    this.planetN = 210;
-    for (var i=0; i<this.planetN; i++) {
-      var planet = new Planet({ pos: Planet.randomPos(),
-                            vel: Planet.randomVel(),
-                            rot: Planet.randomRot(),
-                            moving: true,
-                            mass: 1,
-                            attr: { color: randomColor(),
-                                    name: "Planet-" + i,
-                                    planetN: this.planetN } });
-      this.planets.push(planet);
-    }
-    //var planet = new Planet({ pos: new THREE.Vector3(1,1,1),
-                            //vel: new THREE.Vector3(0,-0.005,0),
+		//this.planets = [];
+    //this.planetN = 210;
+    //for (var i=0; i<this.planetN; i++) {
+      //var planetattr = { pos: Planet.randomPos(),
+                            //vel: Planet.randomVel(),
+                            //rot: Planet.randomRot(),
+                            //moving: true,
+                            //mass: 1,
+                            //attr: { color: randomColor(),
+                                    //name: "Planet-" + i,
+                                    //planetN: this.planetN,
+                                    //debugArrows: true,
+																		 //}
+                         //}
+      //this.addPlanet(planetattr);
+    //}
+    ////var moonattr = { pos: new THREE.Vector3(1,1,1),
+                            ////vel: new THREE.Vector3(0,-0.005,0),
                             //rot: Planet.randomRot(),
                             //moving: true,
                             //mass: 3,
                             //attr: { color: 0x12FFF3,
                                     //name: "Moon",
-                                    //planetN: this.planetN } });
-    //this.planets.push(planet);
-    var planet = new Planet({ pos: new THREE.Vector3(0,0,0),
+                                    //planetN: this.planetN }
+                     // }
+    //this.addPlanet(moonattr);
+
+    var sunattr = { 
+                            id: "sunsunun",
+                            pos: new THREE.Vector3(0,0,0),
                             vel: new THREE.Vector3(0,0,0),
                             rot: Planet.randomRot(),
                             mass: 30,
                             moving: false,
                             attr: { color: 0xfcf80c,
                                     name: "Sun",
-                                    planetN: this.planetN } });
-    this.planets.push(planet);
+                                    debugArrows: false,
+                            }
+                    }
+    this.addPlanet(sunattr);
 
-    this.planets.forEach(p => p.addToScene(this.planetGroup));
-		this.orrery.add(this.planetGroup);
 
     window.planets = this.planets;
 
   }
 
   render() {
+    var self = this;
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
 //    this.orrery.rotation.y += 0.001;
 		this.systems.forEach(s => s.update());
-    this.planets.forEach(b => b.update(this.planets));
+    _.each(self.planets, function(v, k) {
+       v.update(self.planets)
+    });
   }
 
   _setupScene() {
@@ -232,6 +235,58 @@ class Orrery {
   }
 }
 
+/////////////////////
+/////////////////////
+//
+
+var APIbase = "http://library.cybernetics.social"
+var planets_endpoint = "/planets"
+var data = {};
+data.planets = {};
+
+function startApiLoop() {
+    fetchData();
+  }
+
+function fetchData() {
+  $.getJSON(APIbase + planets_endpoint, function(newdata) {
+    if(!(_.isEqual(data, newdata))) {
+      var diffkeys = _.difference(_.keys(newdata), _.keys(data));
+      if( diffkeys.length > 0) {
+
+        _.each(diffkeys, function(k) {
+          console.log(k);
+
+          var planetattr = { 
+                          id: k,
+                          pos: Planet.randomPos(),
+                          vel: Planet.randomVel(),
+                          rot: Planet.randomRot(),
+                          mass: 1,
+                          moving: true,
+                          attr: { color: new THREE.Color(newdata[k].color),
+                                  name: "planet",
+                                  debugArrows: true,
+                          }
+                  }
+          console.log(planetattr);
+          orrery.addPlanet(planetattr);
+
+        });
+        // there are new planets!
+      } else {
+        // no new planets, but planet attributes have changed
+      }
+    }
+  })
+}
+
+///////////////////
+////////////////////
+//
+window.THREE = THREE;
 var orrery = new Orrery();
 window.orrery = orrery;
 orrery.render();
+startApiLoop();
+
