@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 var turnOnPlanetFrame = true;
+var turnOnPlanetName = true;
 var planetFrameDim = 200;
 
 class UI {
@@ -19,10 +20,11 @@ class UI {
       this.planetframe.innerHTML = '<iframe src="http://simulation.cybernetics.social/planet" width=' + planetFrameDim + ' height=' + planetFrameDim + '></iframe>';
     } 
 
-    this.planettooltip = document.getElementById('planettooltip')
+    if(turnOnPlanetName) {
+			this.planettooltip = document.getElementById('planettooltip')
+		}
 
-
-    this.tooltip = document.getElementById('tooltip')
+    this.mousetooltip = document.getElementById('mousetooltip')
 
     this.renderer.domElement.addEventListener('mousemove', ev => {
       var mouse = {
@@ -35,12 +37,12 @@ class UI {
       var intersects = raycaster.intersectObjects(this.scene.getObjectByName( "planetGroup" , true).children, true);
       if (intersects.length > 0) {
         var obj = intersects[0].object;
-        this.tooltip.innerHTML = obj.name;
-        this.tooltip.style.left = `${ev.clientX + 20}px`;
-        this.tooltip.style.top = `${ev.clientY}px`;
-        this.tooltip.style.display = 'block';
+        this.mousetooltip.innerHTML = obj.name;
+        this.mousetooltip.style.left = `${ev.clientX + 20}px`;
+        this.mousetooltip.style.top = `${ev.clientY}px`;
+        this.mousetooltip.style.display = 'block';
       } else {
-        this.tooltip.style.display = 'none';
+        this.mousetooltip.style.display = 'none';
       }
     }, false);
   }
@@ -60,12 +62,14 @@ class UI {
 
     if(turnOnPlanetFrame) {
       this.planetframe.style.left = (pos.x - (planetFrameDim / 2)) + "px";
-      this.planetframe.style.top = (pos.y - 10 - planetFrameDim) + "px";
+      this.planetframe.style.top = (pos.y - 40 - planetFrameDim) + "px";
+      this.planetframe.style.borderRadius = (planetFrameDim / 4) + "px";
+      this.planetframe.style.overflow = "hidden";
     }
 
-    this.planettooltip.innerHTML = "HEY DUDE";
-    this.planettooltip.style.left = pos.x + "px";
-    this.planettooltip.style.top = pos.y + "px";
+    this.planettooltip.innerHTML = "This is You.";
+    this.planettooltip.style.left = (pos.x - 100/2) + "px";
+    this.planettooltip.style.top = (pos.y - 5) + "px";
   }
 
 
