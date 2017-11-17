@@ -4,6 +4,7 @@ import md5 from 'blueimp-md5';
 import config from './config';
 import util from './util';
 import Space from './space';
+import System from './life';
 import createMonument from '../monument';
 
 
@@ -32,6 +33,8 @@ class Planet {
 
       document.getElementById('planet-name').innerHTML = data.name;
       this.nextEvent(this.lastCheckout, true); // animate the last checkout
+
+      this.populate();
     });
   }
 
@@ -89,6 +92,53 @@ class Planet {
         .easing(TWEEN.Easing.Exponential.In)
       ).delay(1000).start();
   }
+
+  populate() {
+    this.systems = [];
+    var forests = new System(24, [4,6],
+      new THREE.ConeGeometry(0.36, 1.2, 4),
+      '#10a025', 0);
+    var clouds = new System(6, [4,6],
+      new THREE.SphereGeometry(0.6, 6, 6),
+      '#ffffff', 1.2);
+    // var people = new System(12, [5,8],
+    //   new THREE.SphereGeometry(0.02, 32, 4),
+    //   '#134fb2', 0);
+    var birds = new System(12, [6,10],
+      new THREE.ConeGeometry(0.1, 0.4, 4),
+      '#f3ff21', 0.8);
+    // people.beings.map(b => {
+    //   b.velocity = {
+    //     x: (Math.random() - 1)/200,
+    //     y: (Math.random() - 1)/200
+    //   }
+    // });
+    birds.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/200,
+        y: (Math.random() - 1)/200
+      }
+    });
+    clouds.beings.map(b => {
+      b.velocity = {
+        x: (Math.random() - 1)/1000,
+        y: (Math.random() - 1)/1000
+      }
+    });
+    // this.systems.push(people);
+    this.systems.push(birds);
+    this.systems.push(forests);
+    this.systems.push(clouds);
+    this.systems.map(s => s.beings.map(b => this.planet.add(b.group)));
+    forests.beings.map(b => {
+      var z = new THREE.Vector3(0,0,0);
+      b.herd.map(member => {
+        var v = new THREE.Vector3();
+        v.subVectors(member.position, z).add(member.position);
+        member.lookAt(v);
+      });
+    });
+  }
 }
 
 document.body.addEventListener('click', function() {
@@ -138,6 +188,7 @@ checkForUpdates();
 space.start(function() {
   if (planet && planet.planet) {
     planet.planet.rotation.y += 0.0008;
+    planet.systems.map(s => s.update());
   }
 
   // poll for changes
