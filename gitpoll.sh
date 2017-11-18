@@ -38,6 +38,7 @@ while true; do
         echo "updated!"
         down
         git pull
+        up
     fi
     sleep 2
 done
