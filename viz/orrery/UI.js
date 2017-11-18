@@ -19,7 +19,7 @@ class UI {
 
     if(this.turnOnPlanetFrame) {
       this.planetframe = document.getElementById('planetframe')
-      this.planetframe.innerHTML = '<iframe src="http://localhost:8081/planet?noname" width=' + this.planetFrameDim + ' height=' + this.planetFrameDim + '></iframe>';
+      this.planetframe.innerHTML = '<iframe src="http://simulation.cybernetics.social/planet?noname" width=' + this.planetFrameDim + ' height=' + this.planetFrameDim + '></iframe>';
     } 
 
     if(this.turnOnPlanetName) {
