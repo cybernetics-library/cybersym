@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import * as THREE from 'three';
 import createMonument from '../monument';
 
@@ -132,6 +133,25 @@ document.addEventListener('keydown', function(ev) {
     }
   }
 });
+
+// process url parameters into an obj; this is so that the planet name can be hidden when an iframe calls it. -Dan
+function processUrlParams() {
+  var search = window.location.search;
+  let hashes = search.slice(search.indexOf('?') + 1).split('&')
+  var params = hashes.reduce((params, hash) => {
+      let [key, val] = hash.split('=')
+      return Object.assign(params, {[key]: decodeURIComponent(val)})
+  }, {})
+  window.params = params;
+}
+processUrlParams();
+
+if('params' in window && 'bigquestion' in window.params && window.params.bigquestion != false) {
+  $("body").addClass("bigquestion");
+}
+
+
+
 
 wonder();
 var space = new Space();
