@@ -19,7 +19,8 @@ class UI {
 
     if(this.turnOnPlanetFrame) {
       this.planetframe = document.getElementById('planetframe')
-      this.planetframe.innerHTML = '<iframe src="http://simulation.cybernetics.social/planet?noname" width=' + this.planetFrameDim + ' height=' + this.planetFrameDim + '></iframe>';
+      this.planetframe.innerHTML = '<iframe id="planetiframe" src="http://simulation.cybernetics.social/planet?noname" width=' + this.planetFrameDim + ' height=' + this.planetFrameDim + '></iframe>';
+			this.planetiframe = document.getElementById('planetiframe')
     } 
 
     if(this.turnOnPlanetName) {
@@ -50,6 +51,10 @@ class UI {
   }
 
   movePlanetFrame(config) {
+    if('params' in window && 'planetFrameDim' in window.params) {
+      this.planetFrameDim = parseInt(window.params.planetFrameDim);
+    }
+
     var width = window.innerWidth, height = window.innerHeight;
     var widthHalf = width / 2, heightHalf = height / 2;
 
@@ -67,6 +72,8 @@ class UI {
       this.planetframe.style.top = (pos.y - 25 - this.planetFrameDim) + "px";
       this.planetframe.style.borderRadius = (this.planetFrameDim / 4) + "px";
       this.planetframe.style.overflow = "hidden";
+      this.planetiframe.width = this.planetFrameDim;
+      this.planetiframe.height  = this.planetFrameDim;
     } else {
       this.planetframe.style.display = "none";
     }

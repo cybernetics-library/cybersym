@@ -96,7 +96,7 @@ class Orrery {
                                     debugArrows: false,
                                      }
                          }
-      if('params' in window && 'randomplanets' in window.params) {
+      if('params' in window && 'randomplanets' in window.params && window.params.randomplanets != false) {
         this.addPlanet(planetattr);
       }
     
