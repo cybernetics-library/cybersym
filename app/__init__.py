@@ -50,6 +50,8 @@ def mix_topics(*topic_mixtures):
     """compute aggregate topic mixture"""
     topic_mixture = sum_dicts(*topic_mixtures)
     total = sum(topic_mixture.values())
+    if total == 0:
+        total = 1
     return {t: v/total for t, v in topic_mixture.items()}
 
 
