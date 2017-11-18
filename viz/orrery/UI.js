@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import $ from 'jquery';
 
 
 class UI {
@@ -12,6 +13,7 @@ class UI {
     this.renderer = config.renderer;
     this.scene = config.scene;
     this.camera = config.camera;
+    this.orrery = config.orrery; 
     this.setupUI()
   }
 
@@ -25,6 +27,11 @@ class UI {
 
     if(this.turnOnPlanetName) {
 			this.planettooltip = document.getElementById('planettooltip')
+
+      for(var i = 0; i < this.orrery.lastFewPlanetN; i++) {
+        $('#planettooltips')
+        .append('<div class="planettooltips" id="planettooltips_' + i + '"></div>')
+      }
 		}
 
     this.mousetooltip = document.getElementById('mousetooltip')
@@ -82,8 +89,30 @@ class UI {
       this.planettooltip.innerHTML = config.obj.name;
       this.planettooltip.style.left = (pos.x - 200/2) + "px";
       this.planettooltip.style.top = (pos.y + 15) + "px";
+
+
+      var self = this;
+      _.each(self.orrery.lastFewPlanets, function(p, i) {
+
+
+        $('#planettooltips_' + i).html(self.orrery.planets[p].name);
+        var thispos = new THREE.Vector3();
+        thispos.setFromMatrixPosition(self.orrery.planets[p].mesh.matrixWorld);
+        thispos.project(self.camera);
+        thispos.x = ( thispos.x * widthHalf ) + widthHalf;
+        thispos.y = - ( thispos.y * heightHalf ) + heightHalf;
+
+        $('#planettooltips_' + i).html(self.orrery.planets[p].name);
+        $('#planettooltips_' + i).css({
+          left: (thispos.x - 200/2) + "px",
+          top:  (thispos.y + 15) + "px",
+        });
+      });
+
+
     } else {
       this.planettooltip.style.display = "none";
+      $(".planettooltips").css("display", "none");
     }
 
   }

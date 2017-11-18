@@ -3,6 +3,7 @@ import _ from 'lodash'
 import * as THREE from 'three';
 import Vue from 'vue'
 
+window.$ = $;
 
 import OrbitControls from './orbit';
 import Planet from './Planet';
@@ -40,14 +41,15 @@ class Orrery {
 
     this.planetFocusID = null;
     this.lastFewPlanets = [];
-    this.lastFewPlanetN = 5;
+    this.lastFewPlanetN = 3;
 
     this.populate();
 
     this.UI = new UI({
         renderer: this.renderer,
         scene: this.scene,
-        camera: this.camera
+        camera: this.camera,
+        orrery: this
     });
     console.log("CALL");
     // var axesHelper = new THREE.AxesHelper( 5 );
@@ -138,7 +140,7 @@ class Orrery {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
     this.orrery.rotation.y += 0.002;
-    this.orrery.rotation.x = Math.sin(timerCounter / 100) / 20;
+    this.orrery.rotation.x = Math.sin(timerCounter / 100) / 10;
     _.each(self.planets, function(v, k) {
        v.update(self.planets)
     });

@@ -19,6 +19,7 @@ planetFactors.aliDist = 0.1;
 planetFactors.boundFac = 0.1;
 planetFactors.swirlFac = 0.1;
 planetFactors.sunPullFac = 0.1;
+planetFactors.sunPullMinDist = 0.7;
 planetFactors.clampXYFac = 0.2;
 planetFactors.maxDistFromCenter = 3;
 
@@ -315,12 +316,17 @@ class Planet {
   }
 
 	pullTowardsSun() {
-		var steer = new THREE.Vector3();
-		steer.copy( this.pos );
-		steer.negate();
-		steer.setLength(this.mass / 1000)
+    var dist = this.pos.distanceTo(planetStatic.origin);
+    if(dist > 0.001 && dist > planetFactors.sunPullMinDist) {
 
-		return steer;
+      var steer = new THREE.Vector3();
+      steer.copy( this.pos );
+      steer.negate();
+      steer.setLength(this.mass / 1000)
+
+      return steer;
+
+    }
   }
 
 
