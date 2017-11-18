@@ -96,7 +96,9 @@ class Orrery {
                                     debugArrows: false,
                                      }
                          }
-//      this.addPlanet(planetattr);
+      if('params' in window && 'randomplanets' in window.params) {
+        this.addPlanet(planetattr);
+      }
     
     }
     ////var moonattr = { pos: new THREE.Vector3(1,1,1),
@@ -120,6 +122,7 @@ class Orrery {
                             attr: { color: 0xfcf80c,
                                     name: "Sun",
                                     debugArrows: false,
+//                                    materialOverride: new THREE.MeshPhongMaterial({ color: 0xfcf80c, transparent: true, opacity: 0.5 }),
                             }
                     }
     this.addPlanet(sunattr);
@@ -192,10 +195,15 @@ class Orrery {
 
 
   _setupLights() {
+    var pointLight = new THREE.PointLight(0xffffff, 3.3, 2);
+    pointLight.position.set(0, 0, 0);
+    this.scene.add(pointLight);
+
     var pointLight = new THREE.PointLight(0xffffff, 0.3, 50);
     pointLight.position.set(0, 20, 0);
     this.scene.add(pointLight);
-    this.scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.55));
     this.scene.add(new THREE.HemisphereLight(0xCCF0FF, 0xFFA1C7, 0.3));
   }
 }
@@ -258,8 +266,8 @@ function fetchData() {
 
         _.each(diff, function(pid) {
           // last few planets is a queue  
-          this.lastFewPlanets.push(pid);
-          if(this.lastFewPlanets.length > this.lastFewPlanetN) { this.lastFewPlanets.shift(); }
+          orrery.lastFewPlanets.push(pid);
+          if(orrery.lastFewPlanets.length > orrery.lastFewPlanetN) { orrery.lastFewPlanets.shift(); }
         });
 
 							
@@ -275,6 +283,19 @@ function fetchData() {
   })
 }
 
+// process url parameters into an obj; this is so that the planet name can be hidden when an iframe calls it. -Dan
+function processUrlParams() {
+  var search = window.location.search;
+  let hashes = search.slice(search.indexOf('?') + 1).split('&')
+  var params = hashes.reduce((params, hash) => {
+      let [key, val] = hash.split('=')
+      return Object.assign(params, {[key]: decodeURIComponent(val)})
+  }, {})
+  window.params = params;
+}
+processUrlParams();
+
+
 
 ///////////////////
 ////////////////////
@@ -284,4 +305,6 @@ var orrery = new Orrery();
 window.orrery = orrery;
 orrery.render();
 startApiLoop();
+
+
 

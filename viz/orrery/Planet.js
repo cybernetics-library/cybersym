@@ -69,7 +69,14 @@ class Planet {
 
     //this.geo = new THREE.ConeGeometry(0.05, 0.23, 7) ;
     this.geo = new THREE.SphereGeometry(this.radius, 12, 12);
-    this.material = new THREE.MeshBasicMaterial({color: this.attributes.color});
+
+    if( 'materialOverride' in this.attributes) {
+      this.material = this.attributes.materialOverride.clone();
+    } else {
+      this.material = new THREE.MeshLambertMaterial({color: this.attributes.color});
+      //this.material = new THREE.MeshPhongMaterial({color: this.attributes.color});
+    }
+
     this.mesh = new THREE.Mesh(this.geo, this.material);
 
     this.name = this.attributes.name;
