@@ -204,7 +204,8 @@ function checkForUpdates() {
 checkForUpdates();
 space.start(function() {
   if (planet && planet.planet) {
-    planet.planet.rotation.y += 0.0008;
+    planet.planet.rotation.y += 0.0118;
+    planet.planet.rotation.x += 0.0051;
     planet.systems.map(s => s.update());
   }
 
