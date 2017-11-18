@@ -15,7 +15,7 @@ var timerCounter = 0;
 
 function randomColor() {
   var cssHSL = "hsl(" + Math.round(360 * Math.random()) + ',' +
-                    Math.round(25 + 70 * Math.random()) + '%,' + 
+                    Math.round(25 + 70 * Math.random()) + '%,' +
                      Math.round(45 + 10 * Math.random()) + '%)';
 //  return new THREE.Color("hsl(0, 100%, 50%)");
   return new THREE.Color(cssHSL);
@@ -61,7 +61,7 @@ class Orrery {
     planet.addToScene(this.planetGroup);
     this.planetFocusID = planet.id
 
-    // last few planets is a queue  
+    // last few planets is a queue
     this.lastFewPlanets.push(planet.id);
     if(this.lastFewPlanets.length > this.lastFewPlanetN) { this.lastFewPlanets.shift(); }
   }
@@ -83,7 +83,7 @@ class Orrery {
 
     this.planetN = 210;
     for (var i=0; i<this.planetN; i++) {
-      var planetattr = { 
+      var planetattr = {
                             id: "randomplanet-" + i,
                             pos: Planet.randomPos({ radius: 2}),
                             vel: Planet.randomVel(),
@@ -99,7 +99,7 @@ class Orrery {
       if('params' in window && 'randomplanets' in window.params && window.params.randomplanets != false) {
         this.addPlanet(planetattr);
       }
-    
+
     }
     ////var moonattr = { pos: new THREE.Vector3(1,1,1),
                             ////vel: new THREE.Vector3(0,-0.005,0),
@@ -112,7 +112,7 @@ class Orrery {
                      // }
     //this.addPlanet(moonattr);
 
-    var sunattr = { 
+    var sunattr = {
                             id: "sunsunun",
                             pos: new THREE.Vector3(0,0,0),
                             vel: new THREE.Vector3(0,0,0),
@@ -189,7 +189,7 @@ class Orrery {
       self.camera.updateProjectionMatrix();
       self.renderer.setSize(width, height);
     }, false);
-  
+
 
   }
 
@@ -212,7 +212,7 @@ class Orrery {
 /////////////////////
 //
 
-var APIbase = "http://library.cybernetics.social"
+var APIbase = "https://library.cybernetics.social"
 var planets_endpoint = "/planets"
 var data = {}; data.planets = {};
 var planetFocusID;
@@ -234,7 +234,7 @@ function fetchData() {
           var thisplanet = newdata[k];
           console.log(k);
 
-          var planetattr = { 
+          var planetattr = {
                           id: k,
                           pos: Planet.randomPos({ radius: 2 }),
                           vel: Planet.randomVel(),
@@ -254,7 +254,7 @@ function fetchData() {
       } else {
         // no new planets, but planet attributes have changed
 
-				function diffBetweenObjects(a, b) { 
+				function diffBetweenObjects(a, b) {
 					// from https://stackoverflow.com/questions/31683075/how-to-do-a-deep-comparison-between-2-objects-with-lodash
 					return _.reduce(a, function(result, value, key) {
 							return _.isEqual(value, b[key]) ?
@@ -265,12 +265,12 @@ function fetchData() {
         orrery.planetFocusID = diff[0];
 
         _.each(diff, function(pid) {
-          // last few planets is a queue  
+          // last few planets is a queue
           orrery.lastFewPlanets.push(pid);
           if(orrery.lastFewPlanets.length > orrery.lastFewPlanetN) { orrery.lastFewPlanets.shift(); }
         });
 
-							
+
         console.log("no new planets, but planet attributes have changed");
         console.log(diff);
         data = newdata;
