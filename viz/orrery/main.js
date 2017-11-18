@@ -41,7 +41,7 @@ class Orrery {
 
     this.planetFocusID = null;
     this.lastFewPlanets = [];
-    this.lastFewPlanetN = 3;
+    this.lastFewPlanetN = 5;
 
     this.populate();
 
