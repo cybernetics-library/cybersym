@@ -96,7 +96,7 @@ class Orrery {
                                     debugArrows: false,
                                      }
                          }
-      this.addPlanet(planetattr);
+//      this.addPlanet(planetattr);
     
     }
     ////var moonattr = { pos: new THREE.Vector3(1,1,1),
