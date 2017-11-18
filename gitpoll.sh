@@ -7,6 +7,10 @@ function down {
     echo "killing..."
     kill $API_PID
     kill -9 -$VIZ_PID
+}
+
+function end {
+    down
     exit 0
 }
 
@@ -21,7 +25,7 @@ function up {
     cd ..
 }
 
-trap down INT TERM QUIT EXIT
+trap end INT TERM QUIT EXIT
 
 up
 
