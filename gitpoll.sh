@@ -6,7 +6,7 @@ VIZ_PID=""
 function down {
     echo "killing..."
     kill $API_PID
-    kill -9 -$VIZ_PID
+    kill -TERM -- -$VIZ_PID
 }
 
 function end {
