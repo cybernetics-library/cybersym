@@ -6,7 +6,7 @@ class UI {
   constructor(config) {
     this.turnOnPlanetFrame = true;
     this.turnOnPlanetName = true;
-    this.planetFrameDim = 200;
+    this.planetFrameDim = 100;
 
 
     this.renderer = config.renderer;
@@ -64,7 +64,7 @@ class UI {
 
     if(this.turnOnPlanetFrame == true) {
       this.planetframe.style.left = (pos.x - (this.planetFrameDim / 2)) + "px";
-      this.planetframe.style.top = (pos.y - 40 - this.planetFrameDim) + "px";
+      this.planetframe.style.top = (pos.y - 25 - this.planetFrameDim) + "px";
       this.planetframe.style.borderRadius = (this.planetFrameDim / 4) + "px";
       this.planetframe.style.overflow = "hidden";
     } else {
@@ -73,8 +73,8 @@ class UI {
 
     if(this.turnOnPlanetName) {
       this.planettooltip.innerHTML = config.obj.name;
-      this.planettooltip.style.left = (pos.x - 100/2) + "px";
-      this.planettooltip.style.top = (pos.y - 5) + "px";
+      this.planettooltip.style.left = (pos.x - 200/2) + "px";
+      this.planettooltip.style.top = (pos.y + 15) + "px";
     } else {
       this.planettooltip.style.display = "none";
     }

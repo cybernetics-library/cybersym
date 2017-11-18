@@ -39,6 +39,8 @@ class Orrery {
     this.planets = {};
 
     this.planetFocusID = null;
+    this.lastFewPlanets = [];
+    this.lastFewPlanetN = 5;
 
     this.populate();
 
@@ -58,6 +60,10 @@ class Orrery {
     this.planets[planet.id] = planet;
     planet.addToScene(this.planetGroup);
     this.planetFocusID = planet.id
+
+    // last few planets is a queue  
+    this.lastFewPlanets.push(planet.id);
+    if(this.lastFewPlanets.length > this.lastFewPlanetN) { this.lastFewPlanets.shift(); }
   }
 
   populate() {
@@ -109,7 +115,7 @@ class Orrery {
                             pos: new THREE.Vector3(0,0,0),
                             vel: new THREE.Vector3(0,0,0),
                             rot: Planet.randomRot(),
-                            mass: 30,
+                            mass: 300,
                             moving: false,
                             attr: { color: 0xfcf80c,
                                     name: "Sun",
@@ -249,6 +255,13 @@ function fetchData() {
         }
         var diff = diffBetweenObjects(data, newdata);
         orrery.planetFocusID = diff[0];
+
+        _.each(diff, function(pid) {
+          // last few planets is a queue  
+          this.lastFewPlanets.push(pid);
+          if(this.lastFewPlanets.length > this.lastFewPlanetN) { this.lastFewPlanets.shift(); }
+        });
+
 							
         console.log("no new planets, but planet attributes have changed");
         console.log(diff);
