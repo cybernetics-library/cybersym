@@ -69,7 +69,12 @@ class Planet {
     this.radius = sphereVolumeToRadius(this.mass) * 0.04;
 
     //this.geo = new THREE.ConeGeometry(0.05, 0.23, 7) ;
-    this.geo = new THREE.SphereGeometry(this.radius, 12, 12);
+    if(this.id = "sunsunsun") {
+      this.geo = new THREE.SphereGeometry(this.radius, 24, 24);
+    } else {
+      this.geo = new THREE.SphereGeometry(this.radius, 12, 12);
+    }
+     
 
     if( 'materialOverride' in this.attributes) {
       this.material = this.attributes.materialOverride.clone();

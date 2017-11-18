@@ -124,7 +124,13 @@ class Orrery {
                             attr: { color: 0xfcf80c,
                                     name: "Sun",
                                     debugArrows: false,
-//                                    materialOverride: new THREE.MeshPhongMaterial({ color: 0xfcf80c, transparent: true, opacity: 0.5 }),
+                                    materialOverride: new THREE.MeshPhongMaterial({
+                                      color: 0xce3221,
+                                      emissive: 0xc3c259,
+                                      specular: 0xffffbf,
+                                      shininess: 20,
+                                      transparent: false,
+                                      opacity: 0.9 }),
                             }
                     }
     this.addPlanet(sunattr);
