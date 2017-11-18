@@ -176,7 +176,7 @@ class Orrery {
     this.scene = new THREE.Scene();
     if (CAMERATYPE === 'persp') {
       this.camera = new THREE.PerspectiveCamera(45, aspect, .1, 20000);
-      this.camera.zoom = 2.5;
+      this.camera.zoom = 2;
     } else {
       this.camera = new THREE.OrthographicCamera(-D*aspect, D*aspect, D, -D, 1, 1000),
       this.camera.zoom = 0.08;
