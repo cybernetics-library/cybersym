@@ -140,7 +140,7 @@ class Orrery {
     requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
     this.orrery.rotation.y += 0.002;
-    this.orrery.rotation.x = Math.sin(timerCounter / 100) / 20;
+    this.orrery.rotation.x = Math.sin(timerCounter / 100) / 10;
     _.each(self.planets, function(v, k) {
        v.update(self.planets)
     });
