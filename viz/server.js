@@ -53,6 +53,10 @@ app.get('/galaxy', function(req, res){
     res.sendFile(__dirname + '/galaxy/index.html');
 });
 
+app.get('/splitscreen', function(req, res){
+    res.sendFile(__dirname + '/splitscreen/index.html');
+});
+
 
 ///////// express server a
 var server = http.createServer(app);

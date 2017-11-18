@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <style type="text/css">
+        @import url('https://fonts.googleapis.com/css?family=Muli');
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Muli';
+            overflow: hidden;
+        }
+
+
+        iframe {
+         border: none;
+            border: 2px solid white !important;
+        }
+
+        #planet, #orrery, #galaxy {
+          width: 33.33vw;
+          height: 100vh;
+          position: absolute;
+        }
+
+        #planet {
+          left: 0px; top: 0px;
+        }
+        #orrery {
+          left: 33.33vw;
+          top: 0px;
+        }
+        #galaxy {
+          right: 0px; top: 0px;
+        }
+
+
+
+    </style>
+    <title>~SPLITSCREEN~</title>
+</head>
+<body>
+  <iframe id="planet" src="https://simulation.cybernetics.social/planet"></iframe>
+  <iframe id="orrery" src="https://simulation.cybernetics.social/orrery?zoom=1.5"></iframe>
+  <iframe id="galaxy" src="https://simulation.cybernetics.social/galaxy"></iframe>
+<script src="splitscreen_bundle.js"></script>
+</body>
+</html>
+

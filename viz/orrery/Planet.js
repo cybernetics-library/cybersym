@@ -335,6 +335,30 @@ class Planet {
   }
 
 
+  //findSimilarPlanets(planets) {
+    //var sum = new THREE.Vector3(0, 0, 0);
+
+    //var arrowCounter = 0;
+
+    //var self = this;
+    //_.each(planets, function(p, id) {
+      ////console.log(b.name);
+      ////console.log(self.name);
+      //var dist = self.pos.distanceTo(p.pos);
+      //if((p.name != self.name) && (dist > (self.radius + p.radius))) {
+        //var target = new THREE.Vector3();
+        //target.copy( p.pos );
+        //target.sub(self.pos);
+
+        //// https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
+        //target.setLength((gravConstant * p.mass) / Math.pow(dist, 2));
+        //sum.add(target);
+
+      //}
+    //});
+  
+    //return sum;
+  //}
 
   moveUpdate(planets) {
   

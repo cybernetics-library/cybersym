@@ -12,6 +12,7 @@ module.exports = {
 		predator_prey_bundle: ['./predator_prey/main.js', hotMiddlewareScript],
 		monuments_bundle: ['./monuments/main.js', hotMiddlewareScript],
 		galaxy_bundle: ['./galaxy/main.js', hotMiddlewareScript],
+		splitscreen_bundle: ['./splitscreen/main.js', hotMiddlewareScript],
 		planet_bundle: ['./planet/main.js', hotMiddlewareScript]
 	},
   output: {
