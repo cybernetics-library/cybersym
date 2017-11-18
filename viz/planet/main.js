@@ -31,7 +31,12 @@ class Planet {
       this.lastCheckout = data.checkouts.pop();
       data.checkouts.map(c => this.nextEvent(c, false));
 
-      document.getElementById('planet-name').innerHTML = data.name;
+      if(('params' in window) && ('noname' in window.params)) {
+        document.getElementById('planet-name').parentElement.style.display = "none";
+      } else {
+        document.getElementById('planet-name').innerHTML = data.name;
+      }
+
       this.nextEvent(this.lastCheckout, true); // animate the last checkout
 
       this.populate();
@@ -144,6 +149,18 @@ class Planet {
 document.body.addEventListener('click', function() {
   document.body.requestFullscreen();
 });
+
+// process url parameters into an obj; this is so that the planet name can be hidden when an iframe calls it. -Dan
+function processUrlParams() {
+  var search = window.location.search;
+  let hashes = search.slice(search.indexOf('?') + 1).split('&')
+  var params = hashes.reduce((params, hash) => {
+      let [key, val] = hash.split('=')
+      return Object.assign(params, {[key]: decodeURIComponent(val)})
+  }, {})
+  window.params = params;
+}
+processUrlParams();
 
 var space = new Space();
 var planet, lastCheckout;

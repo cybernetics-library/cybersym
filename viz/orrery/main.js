@@ -9,26 +9,9 @@ import Planet from './Planet';
 import Starfield from './Starfield';
 import UI from './UI';
 
-var timer = new Timer();
 const CAMERATYPE = 'persp'; // or 'ortho'
 var timerCounter = 0;
 
-
-function Timer(callback, delay) {
-  var timerId, start, remaining = delay;
-  this.pause = function() {
-    window.clearTimeout(timerId);
-    remaining -= new Date() - start;
-    this.paused = true;
-  };
-  this.resume = function() {
-    start = new Date();
-    window.clearTimeout(timerId);
-    timerId = window.setTimeout(callback, remaining);
-    this.paused = false;
-  };
-  this.resume();
-}
 
 function randomColor() {
   var cssHSL = "hsl(" + Math.round(360 * Math.random()) + ',' +
