@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import createMonument from '../monument';
 
 // const API_URL = 'http://localhost:5000';
-const API_URL = 'http://library.cybernetics.social';
+const API_URL = 'https://library.cybernetics.social';
 var timer = new Timer();
 var pivot = new THREE.Group();
 var obj;

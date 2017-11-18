@@ -1,7 +1,7 @@
 const PLANET_RADIUS = 6;
 const PLANET_PADDING = 2;
 const config = {
-  API_URL: 'http://library.cybernetics.social',
+  API_URL: 'https://library.cybernetics.social',
   // API_URL: 'http://localhost:5000',
   DEBUG: false,
 
