@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 
-var turnOnPlanetFrame = true;
-var turnOnPlanetName = true;
-var planetFrameDim = 200;
 
 class UI {
 
   constructor(config) {
+    this.turnOnPlanetFrame = true;
+    this.turnOnPlanetName = true;
+    this.planetFrameDim = 200;
+
+
     this.renderer = config.renderer;
     this.scene = config.scene;
     this.camera = config.camera;
@@ -15,12 +17,12 @@ class UI {
 
   setupUI() {
 
-    if(turnOnPlanetFrame) {
+    if(this.turnOnPlanetFrame) {
       this.planetframe = document.getElementById('planetframe')
-      this.planetframe.innerHTML = '<iframe src="http://localhost:8081/planet?noname" width=' + planetFrameDim + ' height=' + planetFrameDim + '></iframe>';
+      this.planetframe.innerHTML = '<iframe src="http://localhost:8081/planet?noname" width=' + this.planetFrameDim + ' height=' + this.planetFrameDim + '></iframe>';
     } 
 
-    if(turnOnPlanetName) {
+    if(this.turnOnPlanetName) {
 			this.planettooltip = document.getElementById('planettooltip')
 		}
 
@@ -60,16 +62,23 @@ class UI {
     pos.y = - ( pos.y * heightHalf ) + heightHalf;
 
 
-    if(turnOnPlanetFrame) {
-      this.planetframe.style.left = (pos.x - (planetFrameDim / 2)) + "px";
-      this.planetframe.style.top = (pos.y - 40 - planetFrameDim) + "px";
-      this.planetframe.style.borderRadius = (planetFrameDim / 4) + "px";
+    if(this.turnOnPlanetFrame == true) {
+      this.planetframe.style.left = (pos.x - (this.planetFrameDim / 2)) + "px";
+      this.planetframe.style.top = (pos.y - 40 - this.planetFrameDim) + "px";
+      this.planetframe.style.borderRadius = (this.planetFrameDim / 4) + "px";
       this.planetframe.style.overflow = "hidden";
+    } else {
+      this.planetframe.style.display = "none";
     }
 
-    this.planettooltip.innerHTML = config.obj.name;
-    this.planettooltip.style.left = (pos.x - 100/2) + "px";
-    this.planettooltip.style.top = (pos.y - 5) + "px";
+    if(this.turnOnPlanetName) {
+      this.planettooltip.innerHTML = config.obj.name;
+      this.planettooltip.style.left = (pos.x - 100/2) + "px";
+      this.planettooltip.style.top = (pos.y - 5) + "px";
+    } else {
+      this.planettooltip.style.display = "none";
+    }
+
   }
 
 

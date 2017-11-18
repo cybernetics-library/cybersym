@@ -47,6 +47,7 @@ class Orrery {
         scene: this.scene,
         camera: this.camera
     });
+    console.log("CALL");
     // var axesHelper = new THREE.AxesHelper( 5 );
     // this.scene.add( axesHelper );
   }

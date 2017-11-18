@@ -10,7 +10,7 @@ planetFactors.sepFac = 0.32;
 planetFactors.cohFac = 0.03;
 planetFactors.aliFac = 0.00;
 planetFactors.tarFac = 0.31;
-planetFactors.gravFac = 0.5;
+planetFactors.gravFac = 0.1;
 planetFactors.maxSpeed = 0.005;
 planetFactors.maxForce = 0.001;
 planetFactors.cohDist = 0.2;
@@ -38,7 +38,9 @@ var bound_depth = 1;
 
 
 function sphereVolumeToRadius(v) {
-  return Math.pow((3 * v / ( 4 * Math.PI)), 1/3);
+  v = Math.pow(v, 1);
+  var r =  Math.pow((3 * v / ( 4 * Math.PI)), 1/3);
+  return r;
 }
 
 class Planet {
