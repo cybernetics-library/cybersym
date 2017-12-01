@@ -116,6 +116,7 @@ HTML
 var bookid = "{{id}}"  //filled in by Flask
 console.log("bookid: " + bookid);
 var urlHost = window.location.href.split('/').slice(0, 3).join('/');
+var urlHost = "https://library.cybernetics.social";
 var apiURL = urlHost + "/book/" + bookid;
 app = new Vue({
   el: '#book_container',
