@@ -1,0 +1,21 @@
+@font-face {
+    font-family: 'Steps-Mono';
+    src: url('Steps-Mono/Steps-Mono-Mono.eot');
+    src: url('Steps-Mono/Steps-Mono-Mono.eot?#iefix') format('embedded-opentype'),
+        url('Steps-Mono/Steps-Mono-Mono.woff2') format('woff2'),
+        url('Steps-Mono/Steps-Mono-Mono.woff') format('woff'),
+        url('Steps-Mono/Steps-Mono-Mono.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Steps Mono';
+    src: url('Steps-Mono/Steps-Mono-Thin.eot');
+    src: url('Steps-Mono/Steps-Mono-Thin.eot?#iefix') format('embedded-opentype'),
+        url('Steps-Mono/Steps-Mono-Thin.woff2') format('woff2'),
+        url('Steps-Mono/Steps-Mono-Thin.woff') format('woff'),
+        url('Steps-Mono/Steps-Mono-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}

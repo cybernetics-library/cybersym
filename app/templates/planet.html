@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,700" rel="stylesheet">
+<link href="/static/fonts/Steps-Mono.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
 
 <!-- 
@@ -27,18 +28,25 @@ body {
   background-attachment: fixed;
 }
 a, a:visited {
-  color: #FFF;
+  text-decoration: none;
+  color: #000;
 }
 a:hover {
+  text-decoration: underline;
   color: #224ADE;
 }
 .bodycontainer {
 }
-#book_container {
+#planet_container {
+  margin: 40px 20px;
 }
 .header {
+  margin: 30px 0px;
   text-align: center;
-  margin-top: 20px;
+}
+.header_title {
+    margin-top: 10px;
+    font-size: 1.2em;
 }
 .footer    {
     margin:30px 0px 30px 30px;
@@ -47,24 +55,46 @@ a:hover {
 .logo {
   max-width: 200px;
 }
-.book {
-  padding: 20px;
+
+#planet_circle {
+  background: url("/static/cybernetics_planet_circle_white.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  margin: auto;
+  width: 80vw;
+  max-width: 300px;
+  height: 80vw;
+  max-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.book .title {
-  font-size: 1.1em;
+#planet_title {
+  margin-top: 5px;
+  width: 85%;
+  margin: auto;
+  font-size: 2.0em;
+  line-height: 1.15em;
+  color: white;
   font-weight: bold;
+}
+.planet {
+  padding-top: 10px;
+}
+.planet .title {
+  font-size: 1.0em;
   line-height: 1.25em;
   margin-bottom: 10px;
 }
-.book .publication {
+.planet .publication {
   font-size: 1.0em;
   margin-bottom: 10px;
 }
-.book .author {
+.planet .author {
   font-size: 1.1em;
   margin-bottom: 10px;
 }
-.book .source {
+.planet .source {
   margin-bottom: 10px;
 }
 .fullframe iframe {
@@ -89,19 +119,23 @@ HTML
 
 <div class="bodycontainer">
 
-  <div class="header">
-    <img class="logo" src="/static/cybernetics_library_logo.png"/>
-  </div>
+  <div id="planet_container">
 
-  <div id="book_container">
-    <div class="book">
-      <div class="title">${bookdata.title}</div>
-      <div class="author">${bookdata.primaryauthor}</div>
-      <div class="publication">${bookdata.publication}</div>
-      <div class="source">Inter-Library Loan from the collection of: <b>${bookdata.fromwhere}</b></div>
-      <div class="fulllink"><a :href='"https://www.librarything.com/work/book/" + bookid'>LibraryThing Link</a></div>
+    <div class="header">
+      <div id="planet_circle">
+        <div id="planet_title">${planetdata.name}</div>
+      </div>
+      <div class="header_title"><b>Book Checkouts</b> (in reverse chronological order):</div>
     </div>
-    <div class="fullframe"><iframe :src='"https://www.librarycat.org/lib/CyberneticsCon/item/" + bookid'  scrolling=no></iframe></div>
+
+
+    <div class="book" v-for="checkout in planetdata.checkouts" >
+      <div class="planet">
+        <div class="title">&#8594; <a :href='"/checkout/" + checkout.book_id'>${checkout.title}</a></div>
+      </div>
+    </div>
+
+
   </div>
 
   <div class="footer">
@@ -113,16 +147,16 @@ HTML
 
 
 <script>
-var bookid = "{{id}}"  //filled in by Flask
-console.log("bookid: " + bookid);
+var planetid = "{{planetid}}";  //filled in by Flask
+console.log("planetid: " + planetid);
 var urlHost = window.location.href.split('/').slice(0, 3).join('/');
-var apiURL = urlHost + "/book/" + bookid;
+var urlHost = "https://library.cybernetics.social";
+var apiURL = urlHost + "/planets/" + planetid;
 app = new Vue({
-  el: '#book_container',
+  el: '#planet_container',
   delimiters: ['${', '}'], // so that it doesn't clash with flask's templating language
   data: {
-    bookdata: {},
-    bookid: bookid
+    planetdata: {}
   },
   created: function () {
     this.fetchData();
@@ -135,8 +169,9 @@ app = new Vue({
       var self = this
       xhr.open('GET', apiURL)
       xhr.onload = function () {
-        self.bookdata = JSON.parse(xhr.responseText);
+        self.planetdata = JSON.parse(xhr.responseText);
         console.log("Fetched data.");
+        console.log(self.planetdata);
       }
       xhr.send()
     }

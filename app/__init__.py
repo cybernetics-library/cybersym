@@ -11,6 +11,7 @@ from collections import defaultdict
 from .planets import name_from_id
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 CORS(app)
 db = {
     table: DB(table)
@@ -139,6 +140,11 @@ def planets():
         d['name'] = name_from_id(id)
     return jsonify(**planets)
 
+
+@app.route('/planet/<planetid>')
+def planet_page(planetid):
+    """forward to planet page because badge QR codes have this URL embedded in them """
+    return render_template('planet.html', planetid=planetid)
 
 @app.route('/books')
 def books():
