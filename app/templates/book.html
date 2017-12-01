@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400,500,700" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
+
+<!-- 
+///////////////
+CSS
+///////////////
+ -->
+
+<style type="text/css">
+html {
+  height: 100%;
+}
+
+body {
+  font-family: 'Roboto Mono', 'Source Sans Pro', 'Helvetica', 'Arial', sans-serif;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  background: linear-gradient(306deg, rgb(207, 210, 53) 0%, #13a0c5 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+a, a:visited {
+  color: #FFF;
+}
+a:hover {
+  color: #224ADE;
+}
+.bodycontainer {
+}
+#book_container {
+}
+.header {
+  text-align: center;
+  margin-top: 20px;
+}
+.footer    {
+    margin:30px 0px 30px 30px;
+    color:grey;
+}
+.logo {
+  max-width: 200px;
+}
+.book {
+  padding: 20px;
+}
+.book .title {
+  font-size: 1.1em;
+  font-weight: bold;
+  line-height: 1.25em;
+  margin-bottom: 10px;
+}
+.book .publication {
+  font-size: 1.0em;
+  margin-bottom: 10px;
+}
+.book .author {
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+.book .source {
+  margin-bottom: 10px;
+}
+.fullframe iframe {
+	border: none;
+  width: 100%;
+  height: 3000px;
+  overflow: hidden;
+}
+</style>
+
+<!-- 
+///////////////
+HTML
+///////////////
+ -->
+
+<title>CYBERNETICS LIBRARY</title>
+</head>
+
+
+<body>
+
+<div class="bodycontainer">
+
+  <div class="header">
+    <img class="logo" src="/static/cybernetics_library_logo.png"/>
+  </div>
+
+  <div id="book_container">
+    <div class="book">
+      <div class="title">${bookdata.title}</div>
+      <div class="author">${bookdata.primaryauthor}</div>
+      <div class="publication">${bookdata.publication}</div>
+      <div class="source">Inter-Library Loan from the collection of: <b>${bookdata.fromwhere}</b></div>
+      <div class="fulllink"><a :href='"https://www.librarything.com/work/book/" + bookdata.books_id'>LibraryThing Link</a></div>
+    </div>
+    <div class="fullframe"><iframe :src='"https://www.librarycat.org/lib/CyberneticsCon/item/" + bookdata.books_id'  scrolling=no></iframe></div>
+  </div>
+
+  <div class="footer">
+  </div>
+
+</div>
+
+
+
+
+<script>
+var bookid = {{id}}  //filled in by Flask
+var urlHost = window.location.href.split('/').slice(0, 3).join('/');
+var apiURL = urlHost + "/book/147438748";
+app = new Vue({
+  el: '#book_container',
+  delimiters: ['${', '}'], // so that it doesn't clash with flask's templating language
+  data: {
+    bookdata: {}
+  },
+  created: function () {
+    this.fetchData();
+  },
+  beforeDestroy: function() {
+  },
+  methods: {
+    fetchData: function () {
+      var xhr = new XMLHttpRequest()
+      var self = this
+      xhr.open('GET', apiURL)
+      xhr.onload = function () {
+        self.bookdata = JSON.parse(xhr.responseText);
+        console.log("Fetched data.");
+      }
+      xhr.send()
+    }
+  }
+})
+</script>
+
+
+
+</body>
+</html>
