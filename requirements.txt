@@ -12,7 +12,7 @@ pytz==2017.3
 requests==2.18.4
 six==1.11.0
 tzlocal==1.4
-ujson==1.35
+ujson==5.4.0
 urllib3==1.22
 Werkzeug==0.12.2
 colorhash==1.0.2
